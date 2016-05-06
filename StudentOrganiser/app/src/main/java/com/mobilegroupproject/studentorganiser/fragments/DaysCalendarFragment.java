@@ -37,6 +37,9 @@ public class DaysCalendarFragment extends Fragment {
         // Required empty public constructor
     }
 
+    /*
+    * TODO: Pass current week's calendar events through here
+    * */
     public static DaysCalendarFragment newInstance() {
         DaysCalendarFragment fragment = new DaysCalendarFragment();
         Bundle args = new Bundle();
@@ -65,13 +68,18 @@ public class DaysCalendarFragment extends Fragment {
         tabLayout = (TabLayout) view.findViewById(R.id.controls_tab_layout);
         setTabEvents();
 
+
+        addDayFragment("Sunday");
         addDayFragment("Monday");
         addDayFragment("Tuesday");
         addDayFragment("Wednesday");
         addDayFragment("Thursday");
         addDayFragment("Friday");
         addDayFragment("Saturday");
-        addDayFragment("Sunday");
+
+
+
+        setCurrentPagerItem(getCurrentDayOfWeek());
 
         return view;
     }
@@ -111,10 +119,12 @@ public class DaysCalendarFragment extends Fragment {
 
 
 
-
+    /*
+    * TODO: pass single day's calendar events through here
+    * */
     private void addDayFragment(String dayName){
 
-        DayFragment dayFragment = new DayFragment();
+        DayFragment dayFragment = DayFragment.newInstance();
 
         Bundle bundle = new Bundle();
         bundle.putString("data", dayName);
@@ -126,7 +136,7 @@ public class DaysCalendarFragment extends Fragment {
             tabLayout.setupWithViewPager(viewPager);
         }
 
-        setCurrentPagerItem(0);
+        //setCurrentPagerItem(0);
     }
 
 
@@ -139,7 +149,6 @@ public class DaysCalendarFragment extends Fragment {
                 super.onTabSelected(tab);
                 viewPager.setCurrentItem(tab.getPosition());
                 selectedTabPosition = viewPager.getCurrentItem();
-                Log.d("Selected", "Selected " + tab.getPosition());
             }
 
             @Override
@@ -156,6 +165,19 @@ public class DaysCalendarFragment extends Fragment {
         selectedTabPosition = viewPager.getCurrentItem();
         for (int i = 0; i < tabLayout.getTabCount(); i++) {
             tabLayout.getTabAt(i).setCustomView(viewPagerAdapter.getTabView(i));
+        }
+    }
+
+    private int getCurrentDayOfWeek(){
+
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+
+        if(day == 1){
+            return 7;
+        }
+        else{
+            return day-1;
         }
     }
 }

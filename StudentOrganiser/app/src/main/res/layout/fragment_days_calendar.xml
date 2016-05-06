@@ -20,7 +20,7 @@
                 android:id="@+id/controls_tab_layout"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@color/colorPrimaryLight"
+                android:background="@color/colorPrimary"
                 app:tabMode="scrollable"
                 app:tabSelectedTextColor="@android:color/background_light"
                 app:tabTextColor="@android:color/secondary_text_light_nodisable" />

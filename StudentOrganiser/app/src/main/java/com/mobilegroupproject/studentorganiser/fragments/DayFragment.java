@@ -21,6 +21,16 @@ public class DayFragment extends Fragment {
     }
 
 
+    /*
+    * TODO: Pass single day's calendar events through here
+    * */
+    public static DayFragment newInstance() {
+        DayFragment fragment = new DayFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -29,9 +39,6 @@ public class DayFragment extends Fragment {
 
         Bundle bundle = getArguments();
         String dayName = bundle.getString("data");
-
-        TextView textview = (TextView) view.findViewById(R.id.day_fragement_name);
-        textview.setText(dayName);
 
         return view;
     }

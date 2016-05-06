@@ -1,16 +1,43 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.mobilegroupproject.studentorganiser.fragments.DayFragment">
+    tools:context="com.mobilegroupproject.studentorganiser.fragments.DayFragment"
+    android:orientation="vertical">
+
+
 
     <TextView
-        android:id="@+id/day_fragement_name"
-        android:layout_width="wrap_content"
+        android:layout_margin="8dp"
+        android:padding="4dp"
+        android:layout_width="match_parent"
+        android:minHeight="40dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Large Text"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:background="@android:color/holo_green_light"
+        android:textColor="@android:color/white"
+        android:text="9-10 am : Mobile App Development"/>
 
-</FrameLayout>
+    <TextView
+        android:layout_margin="8dp"
+        android:padding="4dp"
+        android:layout_width="match_parent"
+        android:minHeight="40dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_blue_light"
+        android:textColor="@android:color/white"
+        android:text="1-2pm : Data Mining"/>
+    <TextView
+        android:layout_margin="8dp"
+        android:padding="4dp"
+        android:layout_width="match_parent"
+        android:minHeight="40dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/holo_orange_light"
+        android:textColor="@android:color/white"
+        android:text="3-4pm : Advanced Networks"/>
+
+
+
+
+</LinearLayout>
 

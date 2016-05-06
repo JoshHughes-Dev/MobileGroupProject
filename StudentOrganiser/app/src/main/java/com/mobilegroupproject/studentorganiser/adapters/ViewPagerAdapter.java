@@ -16,12 +16,9 @@ import java.util.ArrayList;
 
 
 
-/**
- * Created by DAT on 8/16/2015.
- */
 public class ViewPagerAdapter extends FragmentPagerAdapter {
 
-    Context context;
+    private Context context;
     private final ArrayList<Fragment> fragmentList = new ArrayList<>();
     private final ArrayList<String> fragmentTitleList = new ArrayList<>();
 
