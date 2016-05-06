@@ -2,9 +2,7 @@ package com.mobilegroupproject.studentorganiser.activities;
 
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
+
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -19,9 +17,11 @@ import com.mobilegroupproject.studentorganiser.fragments.DaysCalendarFragment;
 import com.mobilegroupproject.studentorganiser.fragments.WeeksCalendarFragment;
 import com.mobilegroupproject.studentorganiser.listeners.NavDrawerItemSelectedListener;
 
+
 public class CalendarActivity extends AppCompatActivity
         implements WeeksCalendarFragment.OnFragmentInteractionListener,
         DaysCalendarFragment.OnFragmentInteractionListener {
+
 
 
     @Override
@@ -34,10 +34,8 @@ public class CalendarActivity extends AppCompatActivity
 
         InitDrawer(toolbar);
 
+        InitCalendarFragments(savedInstanceState);
 
-        if (savedInstanceState == null) {
-            InitCalendarFragments();
-        }
 
     }
 
@@ -102,33 +100,35 @@ public class CalendarActivity extends AppCompatActivity
     }
 
     /*
-    * Creates new instances of weeks and days calendar fragments and adds to container.
+    * Creates new or existing instances of weeks and days calendar fragments and adds to container.
     * hides weeks and shows days by default
     * */
-    private void InitCalendarFragments(){
+    private void InitCalendarFragments(Bundle savedInstanceState){
 
         // Check that the activity is using the layout version with
         // the fragment_container FrameLayout
         if (findViewById(R.id.calendar_fragment_container) != null) {
 
+            if(savedInstanceState == null){
 
-            // Create a new Fragment to be placed in the activity layout
-            WeeksCalendarFragment weeksCalendarFragment = WeeksCalendarFragment.newInstance();
-            DaysCalendarFragment daysCalendarFragment = DaysCalendarFragment.newInstance();
+                // Create a new Fragment to be placed in the activity layout
+                WeeksCalendarFragment weeksCalendarFragment = WeeksCalendarFragment.newInstance();
+                DaysCalendarFragment daysCalendarFragment = DaysCalendarFragment.newInstance();
 
+                // In case this activity was started with special instructions from an
+                // Intent, pass the Intent's extras to the fragment as arguments
+                weeksCalendarFragment.setArguments(getIntent().getExtras());
+                daysCalendarFragment.setArguments(getIntent().getExtras());
 
-            // In case this activity was started with special instructions from an
-            // Intent, pass the Intent's extras to the fragment as arguments
-            weeksCalendarFragment.setArguments(getIntent().getExtras());
-            daysCalendarFragment.setArguments(getIntent().getExtras());
+                // Add the fragment to the 'fragment_container'
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.calendar_fragment_container, weeksCalendarFragment, getString(R.string.weeks_fragment_tag))
+                        .add(R.id.calendar_fragment_container, daysCalendarFragment, getString(R.string.days_fragment_tag))
+                        .hide(weeksCalendarFragment)
+                        .addToBackStack(null)
+                        .commit();
+            }
 
-            // Add the fragment to the 'fragment_container'
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.calendar_fragment_container, weeksCalendarFragment, getString(R.string.weeks_fragment_tag))
-                    .add(R.id.calendar_fragment_container, daysCalendarFragment, getString(R.string.days_fragment_tag))
-                    .hide(weeksCalendarFragment)
-                    .addToBackStack(null)
-                    .commit();
         }
 
     }

@@ -3,12 +3,19 @@ package com.mobilegroupproject.studentorganiser.fragments;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.CalendarContract;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.mobilegroupproject.studentorganiser.R;
+import com.mobilegroupproject.studentorganiser.adapters.ViewPagerAdapter;
+
+import java.util.Calendar;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -20,7 +27,11 @@ import com.mobilegroupproject.studentorganiser.R;
  */
 public class DaysCalendarFragment extends Fragment {
 
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
+    private ViewPagerAdapter viewPagerAdapter;
     private OnFragmentInteractionListener mListener;
+    private int selectedTabPosition;
 
     public DaysCalendarFragment() {
         // Required empty public constructor
@@ -36,6 +47,7 @@ public class DaysCalendarFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
         if (getArguments() != null) {
         }
     }
@@ -44,7 +56,24 @@ public class DaysCalendarFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_days_calendar, container, false);
+        View view = inflater.inflate(R.layout.fragment_days_calendar, container, false);
+
+
+        viewPager = (ViewPager) view.findViewById(R.id.calendar_view_pager);
+        viewPagerAdapter = new ViewPagerAdapter(getFragmentManager(), getActivity());
+        viewPager.setAdapter(viewPagerAdapter);
+        tabLayout = (TabLayout) view.findViewById(R.id.controls_tab_layout);
+        setTabEvents();
+
+        addDayFragment("Monday");
+        addDayFragment("Tuesday");
+        addDayFragment("Wednesday");
+        addDayFragment("Thursday");
+        addDayFragment("Friday");
+        addDayFragment("Saturday");
+        addDayFragment("Sunday");
+
+        return view;
     }
 
 
@@ -78,5 +107,55 @@ public class DaysCalendarFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onDaysFragmentInteraction();
+    }
+
+
+
+
+    private void addDayFragment(String dayName){
+
+        DayFragment dayFragment = new DayFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putString("data", dayName);
+        dayFragment.setArguments(bundle);
+
+        viewPagerAdapter.addFrag(dayFragment, dayName);
+        viewPagerAdapter.notifyDataSetChanged();
+        if (viewPagerAdapter.getCount() > 0) {
+            tabLayout.setupWithViewPager(viewPager);
+        }
+
+        setCurrentPagerItem(0);
+    }
+
+
+
+    private void setTabEvents() {
+
+        tabLayout.setOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager) {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                super.onTabSelected(tab);
+                viewPager.setCurrentItem(tab.getPosition());
+                selectedTabPosition = viewPager.getCurrentItem();
+                Log.d("Selected", "Selected " + tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                super.onTabUnselected(tab);
+                Log.d("Unselected", "Unselected " + tab.getPosition());
+            }
+        });
+    }
+
+    private void setCurrentPagerItem(int index){
+        viewPager.setCurrentItem(index);
+
+        selectedTabPosition = viewPager.getCurrentItem();
+        for (int i = 0; i < tabLayout.getTabCount(); i++) {
+            tabLayout.getTabAt(i).setCustomView(viewPagerAdapter.getTabView(i));
+        }
     }
 }
