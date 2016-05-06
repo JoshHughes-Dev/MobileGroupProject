@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Calendar">
+        <group android:checkableBehavior="single">
+            <item
+                android:id="@+id/nav_cal_days"
+                android:title="Days" />
+            <item
+                android:id="@+id/nav_cal_weeks"
+                android:title="Weeks" />
+        </group>
+    </item>
+    <item android:title="Tools">
+        <menu>
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Settings" />
+            <item
+                android:id="@+id/nav_stats"
+                android:icon="@drawable/ic_menu_send"
+                android:title="Stats/Progression" />
+        </menu>
+    </item>
+
+</menu>
