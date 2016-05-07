@@ -100,7 +100,7 @@ public class ApiTestActivity extends Activity
         mOutputText.setVerticalScrollBarEnabled(true);
         mOutputText.setMovementMethod(new ScrollingMovementMethod());
         mOutputText.setText(
-                "Click the \'" + BUTTON_TEXT +"\' button to test the API.");
+                "Click the \'" + BUTTON_TEXT + "\' button to test the API.");
         activityLayout.addView(mOutputText);
 
         mProgress = new ProgressDialog(this);
@@ -113,8 +113,6 @@ public class ApiTestActivity extends Activity
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
     }
-
-
 
     /**
      * Attempt to call the API, after verifying that all the preconditions are
@@ -327,7 +325,7 @@ public class ApiTestActivity extends Activity
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
             mService = new com.google.api.services.calendar.Calendar.Builder(
                     transport, jsonFactory, credential)
-                    .setApplicationName("Google Calendar API Android Quickstart")
+                    .setApplicationName("Student Organiser")
                     .build();
         }
 
@@ -338,7 +336,8 @@ public class ApiTestActivity extends Activity
         @Override
         protected List<String> doInBackground(Void... params) {
             try {
-                return getDataFromApi();
+                // return getDataFromApi();
+                return convertEventsToString();
             } catch (Exception e) {
                 mLastError = e;
                 cancel(true);
@@ -351,31 +350,79 @@ public class ApiTestActivity extends Activity
          * @return List of Strings describing returned events.
          * @throws IOException
          */
-        private List<String> getDataFromApi() throws IOException {
-            // List the next 10 events from the primary calendar.
+        private List<List<String>> getDataFromApi() throws IOException {
+            // List events from calendars
             DateTime now = new DateTime(System.currentTimeMillis());
-            List<String> eventStrings = new ArrayList<String>();
-            Events events = mService.events().list("primary")
-                    .setMaxResults(10)
-                    .setTimeMin(now)
-                    .setOrderBy("startTime")
-                    .setSingleEvents(true)
-                    .execute();
-            List<Event> items = events.getItems();
+            List<List<String>> eventMasterList = new ArrayList<>();
+            List<String> calendarIds = getCalendarIds();
 
-            for (Event event : items) {
-                DateTime start = event.getStart().getDateTime();
-                if (start == null) {
-                    // All-day events don't have start times, so just use
-                    // the start date.
-                    start = event.getStart().getDate();
+            for (int i = 0; i < calendarIds.size(); i++) {
+
+                Events events = mService.events().list(calendarIds.get(i))
+                        //.setMaxResults(10)
+                        //.setTimeMin(now)
+                        .setOrderBy("startTime")
+                        .setSingleEvents(true)
+                        .execute();
+                List<Event> items = events.getItems();
+
+                for (Event event : items) {
+                    if(event.getCreator().get("email").toString().contains("@student.lboro.ac.uk")) {
+                        DateTime startDateTime = event.getStart().getDateTime();
+
+                        List<String> eventDetails = new ArrayList<>();
+
+                        if (startDateTime == null) {
+                            // All-day events don't have start times, so just use
+                            // the start date.
+                            startDateTime = event.getStart().getDate();
+                        }
+
+                        eventDetails.add(event.getSummary());
+                        eventDetails.add(startDateTime.toString());
+                        eventDetails.add(event.getLocation());
+                        eventDetails.add(event.getHangoutLink());
+                        eventDetails.add(event.getICalUID());
+                        eventDetails.add(event.getDescription());
+                        eventDetails.add(event.getCreator().toString());
+                        eventDetails.add(event.getColorId());
+
+                        eventMasterList.add(eventDetails);
+                    }
                 }
-                eventStrings.add(
-                        String.format("%s (%s)", event.getSummary(), start));
+
             }
-            return eventStrings;
+                return eventMasterList;
         }
 
+        private List<String> convertEventsToString() throws IOException {   // Test for calendar converter
+            List<List<String>> s = getDataFromApi();
+
+            List<String> list = new ArrayList<>();
+
+                    for (int i=0; i < s.size(); i++) {
+                        list.add(s.get(i).get(0) + " - " + s.get(i).get(1) + " ::::: " + s.get(i).get(6).toString().toLowerCase());
+                    }
+
+            return list;
+
+        }
+
+        private List<String> getCalendarIds() throws IOException {
+            String pageToken=null;
+            List<String> calendarIds = new ArrayList<>();
+
+            do {
+                CalendarList calendarList = mService.calendarList().list().setPageToken(pageToken).execute();
+                List<CalendarListEntry> items = calendarList.getItems();
+
+                for (CalendarListEntry calendarListEntry : items) {
+                 calendarIds.add(calendarListEntry.getId());
+                }
+                pageToken=calendarList.getNextPageToken();
+            } while (pageToken != null);
+            return calendarIds;
+        }
 
         @Override
         protected void onPreExecute() {
