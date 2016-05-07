@@ -25,8 +25,6 @@ public class CalendarActivity extends AppCompatActivity
         implements WeeksCalendarFragment.OnFragmentInteractionListener,
         DaysCalendarFragment.OnFragmentInteractionListener {
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
