@@ -16,6 +16,16 @@ import com.mobilegroupproject.studentorganiser.R;
 import com.mobilegroupproject.studentorganiser.adapters.ViewPagerAdapter;
 
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.GregorianCalendar;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,12 +35,11 @@ import java.util.Calendar;
  * Use the {@link DaysCalendarFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class DaysCalendarFragment extends Fragment {
+public class DaysCalendarFragment extends Fragment{
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private ViewPagerAdapter viewPagerAdapter;
-    private OnFragmentInteractionListener mListener;
     private int selectedTabPosition;
 
     public DaysCalendarFragment() {
@@ -68,69 +77,25 @@ public class DaysCalendarFragment extends Fragment {
         tabLayout = (TabLayout) view.findViewById(R.id.controls_tab_layout);
         setTabEvents();
 
+        createDayFragments();
 
-        addDayFragment("Sunday");
-        addDayFragment("Monday");
-        addDayFragment("Tuesday");
-        addDayFragment("Wednesday");
-        addDayFragment("Thursday");
-        addDayFragment("Friday");
-        addDayFragment("Saturday");
-
-
-
-        setCurrentPagerItem(getCurrentDayOfWeek());
 
         return view;
     }
 
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onDaysFragmentInteraction();
-    }
-
-
-
     /*
     * TODO: pass single day's calendar events through here
     * */
-    private void addDayFragment(String dayName){
+    private void addDayFragment(Map.Entry<String, Integer> mapEntry){
 
-        DayFragment dayFragment = DayFragment.newInstance();
+        DayFragment dayFragment = DayFragment.newInstance(mapEntry);
 
-        Bundle bundle = new Bundle();
-        bundle.putString("data", dayName);
-        dayFragment.setArguments(bundle);
+//        Bundle bundle = new Bundle();
+//        bundle.putString("data", dayName);
+//        dayFragment.setArguments(bundle);
 
-        viewPagerAdapter.addFrag(dayFragment, dayName);
+        viewPagerAdapter.addFrag(dayFragment, mapEntry.getKey());
         viewPagerAdapter.notifyDataSetChanged();
         if (viewPagerAdapter.getCount() > 0) {
             tabLayout.setupWithViewPager(viewPager);
@@ -168,6 +133,25 @@ public class DaysCalendarFragment extends Fragment {
         }
     }
 
+
+
+    private void createDayFragments(){
+
+        Calendar calendar = GregorianCalendar.getInstance();
+
+        calendar.set(Calendar.MONTH, calendar.getFirstDayOfWeek());
+        Map<String,Integer> unsortedMap = calendar.getDisplayNames(Calendar.DAY_OF_WEEK,Calendar.LONG, Locale.getDefault());
+        Map<String,Integer> sortedMap = sortByValue(unsortedMap);
+
+        for (Map.Entry<String, Integer> entry : sortedMap.entrySet()) {
+            addDayFragment(entry);
+        }
+
+
+        setCurrentPagerItem(getCurrentDayOfWeek());
+    }
+
+    /* util method to get current day of week as int (1-7)*/
     private int getCurrentDayOfWeek(){
 
         Calendar calendar = Calendar.getInstance();
@@ -179,5 +163,27 @@ public class DaysCalendarFragment extends Fragment {
         else{
             return day-1;
         }
+    }
+
+    /* util method to sort days of week map*/
+    private static <K, V extends Comparable<? super V>> Map<K, V> sortByValue( Map<K, V> map )
+    {
+        List<Map.Entry<K, V>> convertedList = new LinkedList<>(map.entrySet());
+
+        Collections.sort(convertedList, new Comparator<Map.Entry<K, V>>()
+        {
+            @Override
+            public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2)
+            {
+                return (o1.getValue()).compareTo(o2.getValue());
+            }
+        } );
+
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : convertedList)
+        {
+            result.put( entry.getKey(), entry.getValue() );
+        }
+        return result;
     }
 }
