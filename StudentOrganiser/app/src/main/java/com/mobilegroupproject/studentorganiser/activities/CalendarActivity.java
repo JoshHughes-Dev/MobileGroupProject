@@ -27,10 +27,10 @@ import com.mobilegroupproject.studentorganiser.listeners.NavDrawerItemSelectedLi
 
 public class CalendarActivity extends AppCompatActivity implements DayFragment.OnFragmentInteractionListener {
 
-
     protected boolean dualPane = false;
     protected int lastSelectedEventId = 0;
     private final String lastSelectedEventIdFlag = "lastSelectedEventID";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

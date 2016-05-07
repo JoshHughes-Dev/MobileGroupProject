@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.mobilegroupproject.studentorganiser.activities.CalendarActivity;
+import com.mobilegroupproject.studentorganiser.activities.ApiTestActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         Button tempCalendarBtn = (Button) findViewById(R.id.temp_calender_button);
+        Button tempApiTestBtn = (Button) findViewById(R.id.temp_api_button);
 
         tempCalendarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -25,10 +27,21 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        tempApiTestBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                StartApiTestIntent();
+            }
+        });
+    }
+
+    private void StartApiTestIntent() {
+        Intent intent = new Intent(this, ApiTestActivity.class);
+        startActivity(intent);
     }
 
 
-    private void StartCalendarIntent(){
+    private void StartCalendarIntent() {
         Intent intent = new Intent(this, CalendarActivity.class);
         startActivity(intent);
     }
