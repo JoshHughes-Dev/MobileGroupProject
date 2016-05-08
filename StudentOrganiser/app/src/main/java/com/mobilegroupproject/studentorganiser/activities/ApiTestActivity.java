@@ -16,12 +16,19 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.client.util.DateTime;
 
 import com.google.api.services.calendar.model.*;
+import com.mobilegroupproject.studentorganiser.dbHelper.CalendarDbHelper;
+import com.mobilegroupproject.studentorganiser.table.EventsTable;
+
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 
 import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -61,6 +68,10 @@ public class ApiTestActivity extends Activity
     private static final String BUTTON_TEXT = "Call Google Calendar API";
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = { CalendarScopes.CALENDAR_READONLY };
+
+    CalendarDbHelper calendarDbHelper = new CalendarDbHelper(getBaseContext()); // what is context???
+
+    SQLiteDatabase db = calendarDbHelper.getWritableDatabase();
 
     /**
      * Create the main activity.
@@ -408,6 +419,33 @@ public class ApiTestActivity extends Activity
 
         }
 
+        private void seedEvents() {
+            try {
+                List<List<String>> events = getDataFromApi();
+
+                //CalendarDbHelper calendarDbHelper = new CalendarDbHelper(getBaseContext()); // what is context???
+
+                //SQLiteDatabase db = calendarDbHelper.getWritableDatabase();
+
+                for (List<String> event : events) {
+                    ContentValues values = new ContentValues();
+                    values.put(EventsTable.TITLE, event.get(0));
+                    values.put(EventsTable.DATETIME, event.get(1));
+                    values.put(EventsTable.BUILDING, event.get(2));
+                    values.put(EventsTable.HANGOUT_LINK, event.get(3));
+                    values.put(EventsTable.CREATOR, event.get(4));
+                    values.put(EventsTable.COLOUR_ID, event.get(5));
+                    values.put(EventsTable.DESCRIPTION, event.get(6));
+                    values.put(EventsTable.UID, event.get(7));
+
+                    db.insert(EventsTable.TABLE_NAME, null, values);
+                }
+            }
+            catch (IOException e) {
+
+            }
+        }
+
         private List<String> getCalendarIds() throws IOException {
             String pageToken=null;
             List<String> calendarIds = new ArrayList<>();
@@ -433,11 +471,31 @@ public class ApiTestActivity extends Activity
         @Override
         protected void onPostExecute(List<String> output) {
             mProgress.hide();
+            seedEvents();
             if (output == null || output.size() == 0) {
                 mOutputText.setText("No results returned.");
             } else {
                 output.add(0, "Data retrieved using the Google Calendar API:");
-                mOutputText.setText(TextUtils.join("\n", output));
+                //mOutputText.setText(TextUtils.join("\n", output));
+                SQLiteDatabase db = calendarDbHelper.getReadableDatabase();
+
+                String[] projection = {
+                        EventsTable.TITLE,
+                        EventsTable.DATETIME,
+                        EventsTable.BUILDING,
+                        EventsTable.HANGOUT_LINK,
+                        EventsTable.CREATOR,
+                        EventsTable.COLOUR_ID,
+                        EventsTable.DESCRIPTION,
+                        EventsTable.UID
+                };
+
+                String sortOrder = EventsTable.TITLE + "DESC";
+
+                Cursor c = db.rawQuery("select * from EventsTable", null);
+
+                c.moveToFirst();
+                mOutputText.setText(c.getString(c.getColumnIndexOrThrow(EventsTable.TITLE)));
             }
         }
 
@@ -461,5 +519,10 @@ public class ApiTestActivity extends Activity
                 mOutputText.setText("Request cancelled.");
             }
         }
+
+
     }
+
+
+
 }
