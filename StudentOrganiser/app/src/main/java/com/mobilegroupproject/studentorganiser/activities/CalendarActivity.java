@@ -13,6 +13,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,8 +44,8 @@ public class CalendarActivity extends AppCompatActivity {
     private WeekView calendarWeekView;
 
     protected boolean dualPane = false;
-    protected int lastSelectedEventId = 0;
-    private final String lastSelectedEventIdFlag = "lastSelectedEventId";
+    protected String lastSelectedEvent = "";
+    private final String lastSelectedEventFlag = "lastSelectedEventId";
     private final String currentNumOfDaysFlag = "currentNumOfDays";
 
     public int currentNumOfDays = 1;
@@ -59,7 +60,7 @@ public class CalendarActivity extends AppCompatActivity {
 
         if(savedInstanceState != null){
             currentNumOfDays = savedInstanceState.getInt(currentNumOfDaysFlag, 1);
-            lastSelectedEventId = savedInstanceState.getInt(lastSelectedEventIdFlag, 0);
+            lastSelectedEvent = savedInstanceState.getString(lastSelectedEventFlag);
         }
 
         initDrawer(toolbar);
@@ -77,7 +78,7 @@ public class CalendarActivity extends AppCompatActivity {
 
         if (dualPane) {
             // Send the item selected to showDetails so the right info is shown
-            showEventDetails(lastSelectedEventId);
+            showEventDetails(lastSelectedEvent);
         }
     }
 
@@ -127,7 +128,7 @@ public class CalendarActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(lastSelectedEventIdFlag, lastSelectedEventId);
+        outState.putString(lastSelectedEventFlag, lastSelectedEvent);
         outState.putInt(currentNumOfDaysFlag, currentNumOfDays);
     }
 
@@ -182,15 +183,14 @@ public class CalendarActivity extends AppCompatActivity {
         calendarWeekView.setNumberOfVisibleDays(currentNumOfDays); //set inital layout format
         setupDateTimeInterpreter(currentNumOfDays); //set inital format
 
-        calendarWeekView.setShowNowLine(true);
 
+        calendarWeekView.setNowLineColor(R.color.colorAccent);
+        calendarWeekView.setShowNowLine(true);
+        calendarWeekView.setShowDistinctWeekendColor(true);
 
         setCalendarWeekViewCurrentHour();
 
-
-
-
-        calendarWeekView.setOnEventClickListener(new CalendarEventClickListener());
+        calendarWeekView.setOnEventClickListener(new CalendarEventClickListener(this));
 
         // The week view has infinite scrolling horizontally. We have to provide the events of a
         // month every time the month changes on the week view.
@@ -208,10 +208,12 @@ public class CalendarActivity extends AppCompatActivity {
     /*
     * TODO: Shows details data for single event
     * */
-    protected void showEventDetails(int eventId) {
+    public void showEventDetails( String eventName) {
+
+        Log.d("calendarActivity", Boolean.toString(dualPane));
 
         // The most recently selected event
-        lastSelectedEventId = eventId;
+        lastSelectedEvent = eventName;
 
         // Check if we are in horizontal mode and if yes show dual pane
         if (dualPane) {
@@ -222,10 +224,10 @@ public class CalendarActivity extends AppCompatActivity {
             // When a DetailsFragment is created by calling newInstance the index for the data
             // it is supposed to show is passed to it. If that index hasn't been assigned we must
             // assign it in the if block
-            if (eventDetailsFragment == null || eventDetailsFragment.getShownIndex() != eventId) {
+            if (eventDetailsFragment == null || !eventDetailsFragment.getEventName().equalsIgnoreCase(eventName)) {
 
                 // Make the details fragment and give it the currently selected hero index
-                eventDetailsFragment = EventDetailsFragment.newInstance(eventId);
+                eventDetailsFragment = EventDetailsFragment.newInstance(eventName);
 
                 // Start Fragment transactions
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -245,7 +247,7 @@ public class CalendarActivity extends AppCompatActivity {
             intent.setClass(CalendarActivity.this, EventDetailsActivity.class);
 
             // Pass along the currently selected index assigned to the keyword index
-            intent.putExtra("index", eventId);
+            intent.putExtra("eventName", eventName);
 
             // Call for the Activity to open
             startActivity(intent);
@@ -258,7 +260,7 @@ public class CalendarActivity extends AppCompatActivity {
             @Override
             public String interpretDate(Calendar date) {
 
-                
+
                 String weekdayStringFormat = "EEEE";
                 String dateStringFormat = "d MMM";
 
