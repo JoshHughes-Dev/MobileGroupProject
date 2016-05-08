@@ -6,18 +6,25 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.mobilegroupproject.studentorganiser.activities.CalendarActivity"
-    tools:showIn="@layout/app_bar_calendar">
+    tools:showIn="@layout/app_bar_calendar"
+    android:background="#fff">
 
-    <!--<RelativeLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:id="@+id/calendar_fragment_container">-->
-    <!--</RelativeLayout>-->
-    <fragment
+
+    <com.alamkanak.weekview.WeekView
+        android:id="@+id/calander_weekView_widget"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/fragment_calendar_views"
-        class="com.mobilegroupproject.studentorganiser.fragments.CalendarViewsContainerFragment"
-        tools:layout="@layout/fragment_calendar_views_container" />
+        app:eventTextColor="@android:color/white"
+        app:textSize="12sp"
+        app:hourHeight="60dp"
+        app:headerColumnPadding="8dp"
+        app:headerColumnTextColor="@color/colorPrimaryDark"
+        app:headerRowPadding="12dp"
+        app:columnGap="8dp"
+        app:noOfVisibleDays="1"
+        app:dayBackgroundColor="#05000000"
+        app:todayBackgroundColor="#1848adff"
+        app:headerColumnBackground="#ffffffff"
+        app:todayHeaderTextColor="@color/colorAccent" />
 
 </FrameLayout>

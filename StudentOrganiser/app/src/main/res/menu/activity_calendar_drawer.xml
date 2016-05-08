@@ -4,11 +4,14 @@
     <item android:title="Calendar">
         <group android:checkableBehavior="single">
             <item
-                android:id="@+id/nav_cal_days"
-                android:title="Days" />
+                android:id="@+id/nav_cal_day"
+                android:title="Day" />
             <item
-                android:id="@+id/nav_cal_weeks"
-                android:title="Weeks" />
+                android:id="@+id/nav_cal_three_day"
+                android:title="3-Day" />
+            <item
+                android:id="@+id/nav_cal_week"
+                android:title="Week" />
         </group>
     </item>
     <item android:title="Tools">

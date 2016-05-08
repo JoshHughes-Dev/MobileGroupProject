@@ -18,19 +18,36 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.alamkanak.weekview.DateTimeInterpreter;
+import com.alamkanak.weekview.WeekView;
+
 import com.mobilegroupproject.studentorganiser.R;
 
-import com.mobilegroupproject.studentorganiser.fragments.DayFragment;
 import com.mobilegroupproject.studentorganiser.fragments.EventDetailsFragment;
+import com.mobilegroupproject.studentorganiser.listeners.CalendarEmptyViewLongPressListener;
+import com.mobilegroupproject.studentorganiser.listeners.CalendarEventClickListener;
+import com.mobilegroupproject.studentorganiser.listeners.CalendarEventLongPressListener;
+import com.mobilegroupproject.studentorganiser.listeners.CalendarMonthChangeListener;
 import com.mobilegroupproject.studentorganiser.listeners.NavDrawerItemSelectedListener;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
 
-public class CalendarActivity extends AppCompatActivity implements DayFragment.OnFragmentInteractionListener {
+
+public class CalendarActivity extends AppCompatActivity {
+
+
+    private WeekView calendarWeekView;
 
     protected boolean dualPane = false;
     protected int lastSelectedEventId = 0;
-    private final String lastSelectedEventIdFlag = "lastSelectedEventID";
+    private final String lastSelectedEventIdFlag = "lastSelectedEventId";
+    private final String currentNumOfDaysFlag = "currentNumOfDays";
 
+    public int currentNumOfDays = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,25 +57,23 @@ public class CalendarActivity extends AppCompatActivity implements DayFragment.O
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        if(savedInstanceState != null){
+            currentNumOfDays = savedInstanceState.getInt(currentNumOfDaysFlag, 1);
+            lastSelectedEventId = savedInstanceState.getInt(lastSelectedEventIdFlag, 0);
+        }
+
         initDrawer(toolbar);
 
         initAddNewEntryButton();
 
+        initCalendarWidget();
+
 
         // Check if the FrameLayout with the id details exists
-
         View detailsFrame = findViewById(R.id.frame_event_details);
         // Set dualPane based on whether you are in the horizontal layout
         // Check if the detailsFrame exists and if it is visible
         dualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
-
-        // If the screen is rotated onSaveInstanceState() below will store the
-        // event data most recently selected. Get the value attached to curChoice and
-        // store it in lastSelectedEventId
-        if (savedInstanceState != null) {
-            // Restore last state for checked position.
-            lastSelectedEventId = savedInstanceState.getInt(lastSelectedEventIdFlag, 0);
-        }
 
         if (dualPane) {
             // Send the item selected to showDetails so the right info is shown
@@ -113,6 +128,7 @@ public class CalendarActivity extends AppCompatActivity implements DayFragment.O
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(lastSelectedEventIdFlag, lastSelectedEventId);
+        outState.putInt(currentNumOfDaysFlag, currentNumOfDays);
     }
 
 
@@ -132,8 +148,8 @@ public class CalendarActivity extends AppCompatActivity implements DayFragment.O
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         if(navigationView != null){
             navigationView.setNavigationItemSelectedListener(
-                    new NavDrawerItemSelectedListener(getApplicationContext(), drawer, getSupportFragmentManager()));
-            navigationView.setCheckedItem(R.id.nav_cal_days);
+                    new NavDrawerItemSelectedListener(CalendarActivity.this, drawer, getSupportFragmentManager()));
+            navigationView.setCheckedItem(R.id.nav_cal_day);
         }
 
     }
@@ -158,13 +174,35 @@ public class CalendarActivity extends AppCompatActivity implements DayFragment.O
 
 
 
+    private void initCalendarWidget(){
 
-    //fragment interface for day fragment selection.
-    // TODO pass event id though here
-    @Override
-    public void onDayFragmentEventSelected(int index){
-        showEventDetails(index);
+        // Get a reference for the week view in the layout.
+        calendarWeekView = (WeekView) findViewById(R.id.calander_weekView_widget);
+
+        calendarWeekView.setNumberOfVisibleDays(currentNumOfDays); //set inital layout format
+        setupDateTimeInterpreter(currentNumOfDays); //set inital format
+
+        calendarWeekView.setShowNowLine(true);
+
+
+        setCalendarWeekViewCurrentHour();
+
+
+
+
+        calendarWeekView.setOnEventClickListener(new CalendarEventClickListener());
+
+        // The week view has infinite scrolling horizontally. We have to provide the events of a
+        // month every time the month changes on the week view.
+        calendarWeekView.setMonthChangeListener(new CalendarMonthChangeListener(this));
+
+        // Set long press listener for events.
+        calendarWeekView.setEventLongPressListener(new CalendarEventLongPressListener());
+
+        // Set long press listener for empty view
+        calendarWeekView.setEmptyViewLongPressListener(new CalendarEmptyViewLongPressListener());
     }
+
 
 
     /*
@@ -214,5 +252,56 @@ public class CalendarActivity extends AppCompatActivity implements DayFragment.O
         }
     }
 
+    public void setupDateTimeInterpreter(final int currentNumOfDays) {
+
+        calendarWeekView.setDateTimeInterpreter(new DateTimeInterpreter() {
+            @Override
+            public String interpretDate(Calendar date) {
+
+                
+                String weekdayStringFormat = "EEEE";
+                String dateStringFormat = "d MMM";
+
+                switch(currentNumOfDays){
+                    case 1:
+                        //use defaults
+                        break;
+                    case 3:
+                        weekdayStringFormat = "EEE";
+                        dateStringFormat = "d/M";
+                        break;
+                    case 7:
+                        weekdayStringFormat = "EEEEE";
+                        dateStringFormat = "d/M";
+                        break;
+                }
+
+                SimpleDateFormat weekdayNameFormat = new SimpleDateFormat(weekdayStringFormat, Locale.UK);
+                String weekday = weekdayNameFormat.format(date.getTime());
+                SimpleDateFormat format = new SimpleDateFormat(dateStringFormat, Locale.UK);
+
+
+                return weekday.toUpperCase() + " " + format.format(date.getTime());
+
+            }
+
+            @Override
+            public String interpretTime(int hour) {
+                return hour > 11 ? (hour - 12) + " PM" : (hour == 0 ? "12 AM" : hour + " AM");
+            }
+        });
+    }
+
+
+    public void setCalendarWeekViewCurrentHour(){
+
+        Date date = new Date();   // given date
+        Calendar calendar = GregorianCalendar.getInstance(); // creates a new calendar instance
+        calendar.setTime(date);   // assigns calendar to given date
+
+        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+
+        calendarWeekView.goToHour(currentHour);
+    }
 
 }
