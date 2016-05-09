@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,8 +21,12 @@ import android.widget.Toast;
 
 import com.alamkanak.weekview.WeekView;
 
+import com.alamkanak.weekview.WeekViewEvent;
+import com.alamkanak.weekview.WeekViewLoader;
+import com.mobilegroupproject.studentorganiser.CalenderUITestData;
 import com.mobilegroupproject.studentorganiser.R;
 import com.mobilegroupproject.studentorganiser.fragments.EventDetailsFragment;
+import com.mobilegroupproject.studentorganiser.fragments.CalenderViewDataFragment;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarDateTimeInterpreter;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarEmptyViewLongPressListener;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarEventClickListener;
@@ -31,27 +36,27 @@ import com.mobilegroupproject.studentorganiser.listeners.NavDrawerItemSelectedLi
 import com.mobilegroupproject.studentorganiser.model.ParcelableCalendarDate;
 
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-
+import java.util.List;
 
 
 public class CalendarActivity extends AppCompatActivity {
-
-
-    private WeekView calendarWeekView;
-
 
 
     private final String lastSelectedEventIdFlag = "lastSelectedEventId";
     private final String currentNumOfDaysFlag = "currentNumOfDays";
     private final String lastViewedDateFlag = "lastViewedDate";
 
+    private WeekView calendarWeekView;
     public int currentNumOfDays = 1;
     protected int lastSelectedEventId = 0;
     protected boolean dualPane = false;
     protected ParcelableCalendarDate lastViewedDate;
+    protected ArrayList<WeekViewEvent> events;
+    protected CalenderViewDataFragment dataFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +71,8 @@ public class CalendarActivity extends AppCompatActivity {
             lastSelectedEventId = savedInstanceState.getInt(lastSelectedEventIdFlag);
             lastViewedDate = savedInstanceState.getParcelable(lastViewedDateFlag);
         }
+
+        initDataSource();
 
         initDrawer(toolbar);
 
@@ -100,6 +107,13 @@ public class CalendarActivity extends AppCompatActivity {
 
     }
 
+    /*when activity is destroyed, need to retain events data in data fragment*/
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // store the data in the fragment
+        dataFragment.setData(events);
+    }
 
     /* creates nav bar pop up menu*/
     @Override
@@ -136,6 +150,27 @@ public class CalendarActivity extends AppCompatActivity {
         outState.putParcelable(lastViewedDateFlag, lastViewedDate);
     }
 
+    private void initDataSource(){
+
+        // find the retained fragment on activity restarts
+        FragmentManager fm = getSupportFragmentManager();
+        dataFragment = (CalenderViewDataFragment) fm.findFragmentByTag("data");
+
+        // create the fragment and data the first time
+        if (dataFragment == null) {
+
+            dataFragment = new CalenderViewDataFragment();
+            fm.beginTransaction().add(dataFragment, "data").commit();
+
+            //load data into data fragment
+            CalenderUITestData calenderUITestData = new CalenderUITestData(this);
+            dataFragment.setData(calenderUITestData.CreateTestData());
+        }
+
+        //get data from data fragment and bind to local var
+        events = dataFragment.getData();
+    }
+
 
     /* Initialises navigation drawer and binds navigation item select listener */
     private void initDrawer(Toolbar toolbar){
@@ -158,8 +193,6 @@ public class CalendarActivity extends AppCompatActivity {
         }
 
     }
-
-
 
 
     /* initialises 'add new entry button' (floating button) */
@@ -191,13 +224,11 @@ public class CalendarActivity extends AppCompatActivity {
         // to get a callback when an event is pressed
         calendarWeekView.setOnEventClickListener(new CalendarEventClickListener(this));
         // to provide events to the calendar by months
-        calendarWeekView.setMonthChangeListener(new CalendarMonthChangeListener(this));
+        calendarWeekView.setMonthChangeListener(new CalendarMonthChangeListener(this, events));
         // to get a callback when an event is long pressed
         calendarWeekView.setEventLongPressListener(new CalendarEventLongPressListener());
         //to get a callback when any empty space is long pressed
         calendarWeekView.setEmptyViewLongPressListener(new CalendarEmptyViewLongPressListener());
-
-
 
         calendarWeekView.setScrollListener(new WeekView.ScrollListener() {
             @Override
@@ -205,7 +236,6 @@ public class CalendarActivity extends AppCompatActivity {
                 updateLastViewedDateAndTime(newFirstVisibleDay);
             }
         });
-
 
 
         //view configuration...
@@ -262,8 +292,6 @@ public class CalendarActivity extends AppCompatActivity {
             startActivity(intent);
         }
     }
-
-
 
 
     public void setCalendarWeekViewDateAndTime(){

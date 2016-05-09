@@ -9,7 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.alamkanak.weekview.WeekViewEvent;
+import com.mobilegroupproject.studentorganiser.CalenderUITestData;
 import com.mobilegroupproject.studentorganiser.R;
+import com.mobilegroupproject.studentorganiser.activities.CalendarActivity;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -39,6 +44,11 @@ public class EventDetailsFragment extends Fragment {
 
     //TODO use to get single event model
     protected void getEvent(){
+//        CalenderUITestData test = new CalenderUITestData((CalendarActivity)getActivity());
+//        ArrayList<WeekViewEvent> testEvents = test.CreateTestData();
+//        for(int i = 0; i<testEvents; i++){
+//            if(testEvents.get(i).getId() == getEventId())
+//        }
 
     }
 
