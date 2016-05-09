@@ -1,29 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:title="Calendar">
-        <group android:checkableBehavior="single">
-            <item
-                android:id="@+id/nav_cal_day"
-                android:title="Day" />
-            <item
-                android:id="@+id/nav_cal_three_day"
-                android:title="3-Day" />
-            <item
-                android:id="@+id/nav_cal_week"
-                android:title="Week" />
-        </group>
-    </item>
+
+    <group android:checkableBehavior="single">
+        <item
+            android:icon="@drawable/ic_menu_view_day"
+            android:id="@+id/nav_cal_day"
+            android:title="Day" />
+        <item
+            android:icon="@drawable/ic_menu_view_column"
+            android:id="@+id/nav_cal_three_day"
+            android:title="3-Day" />
+        <item
+            android:icon="@drawable/ic_menu_view_column"
+            android:id="@+id/nav_cal_week"
+            android:title="Week" />
+    </group>
+
     <item android:title="Tools">
         <menu>
-            <item
-                android:id="@+id/nav_settings"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Settings" />
+
             <item
                 android:id="@+id/nav_stats"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Stats/Progression" />
+                android:icon="@drawable/ic_menu_chart"
+                android:title="Stats/Progress" />
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_menu_share"
+                android:title="Share" />
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_menu_settings"
+                android:title="Settings" />
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_menu_logout"
+                android:title="Log out" />
         </menu>
     </item>
 

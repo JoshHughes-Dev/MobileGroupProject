@@ -25,6 +25,8 @@
         app:dayBackgroundColor="#05000000"
         app:todayBackgroundColor="#1848adff"
         app:headerColumnBackground="#ffffffff"
-        app:todayHeaderTextColor="@color/colorAccent" />
+        app:todayHeaderTextColor="@color/colorAccent"
+        app:nowLineColor="@color/colorAccent"
+        />
 
 </FrameLayout>

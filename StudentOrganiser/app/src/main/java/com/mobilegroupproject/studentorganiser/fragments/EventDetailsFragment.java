@@ -17,23 +17,29 @@ import com.mobilegroupproject.studentorganiser.R;
 public class EventDetailsFragment extends Fragment {
 
 
+    public static final String eventIdFlag = "eventIdFlag";
+
     public EventDetailsFragment() {
         // Required empty public constructor
     }
 
-    public static EventDetailsFragment newInstance(String eventName) {
+    public static EventDetailsFragment newInstance(int eventId) {
         EventDetailsFragment fragment = new EventDetailsFragment();
         Bundle args = new Bundle();
-        args.putString("eventName", eventName);
+        args.putInt(eventIdFlag, eventId);
         fragment.setArguments(args);
         return fragment;
     }
 
 
-    public String getEventName() {
+    public int getEventId() {
 	    // Returns the index assigned
-        Log.d("EventDetailsFragment", getArguments().getString("eventName"));
-        return getArguments().getString("eventName");
+        return getArguments().getInt(eventIdFlag);
+    }
+
+    //TODO use to get single event model
+    protected void getEvent(){
+
     }
 
 
@@ -43,7 +49,7 @@ public class EventDetailsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_event_details, container, false);
 
         TextView textView = (TextView) view.findViewById(R.id.event_details_test_textview);
-        textView.setText(getEventName());
+        textView.setText(Integer.toString(getEventId()));
 
         return view;
 

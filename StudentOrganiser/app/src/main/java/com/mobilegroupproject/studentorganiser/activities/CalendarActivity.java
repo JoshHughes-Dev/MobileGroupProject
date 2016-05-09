@@ -13,29 +13,28 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.WeekView;
 
 import com.mobilegroupproject.studentorganiser.R;
-
 import com.mobilegroupproject.studentorganiser.fragments.EventDetailsFragment;
+import com.mobilegroupproject.studentorganiser.listeners.CalendarDateTimeInterpreter;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarEmptyViewLongPressListener;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarEventClickListener;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarEventLongPressListener;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarMonthChangeListener;
 import com.mobilegroupproject.studentorganiser.listeners.NavDrawerItemSelectedListener;
+import com.mobilegroupproject.studentorganiser.model.ParcelableCalendarDate;
 
-import java.text.SimpleDateFormat;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Locale;
+
 
 
 public class CalendarActivity extends AppCompatActivity {
@@ -43,12 +42,16 @@ public class CalendarActivity extends AppCompatActivity {
 
     private WeekView calendarWeekView;
 
-    protected boolean dualPane = false;
-    protected String lastSelectedEvent = "";
-    private final String lastSelectedEventFlag = "lastSelectedEventId";
+
+
+    private final String lastSelectedEventIdFlag = "lastSelectedEventId";
     private final String currentNumOfDaysFlag = "currentNumOfDays";
+    private final String lastViewedDateFlag = "lastViewedDate";
 
     public int currentNumOfDays = 1;
+    protected int lastSelectedEventId = 0;
+    protected boolean dualPane = false;
+    protected ParcelableCalendarDate lastViewedDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +63,8 @@ public class CalendarActivity extends AppCompatActivity {
 
         if(savedInstanceState != null){
             currentNumOfDays = savedInstanceState.getInt(currentNumOfDaysFlag, 1);
-            lastSelectedEvent = savedInstanceState.getString(lastSelectedEventFlag);
+            lastSelectedEventId = savedInstanceState.getInt(lastSelectedEventIdFlag);
+            lastViewedDate = savedInstanceState.getParcelable(lastViewedDateFlag);
         }
 
         initDrawer(toolbar);
@@ -78,7 +82,7 @@ public class CalendarActivity extends AppCompatActivity {
 
         if (dualPane) {
             // Send the item selected to showDetails so the right info is shown
-            showEventDetails(lastSelectedEvent);
+            showEventDetails(lastSelectedEventId);
         }
     }
 
@@ -115,10 +119,9 @@ public class CalendarActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         switch(id){
-            case R.id.action_logout:
+            case R.id.action_today:
+                calendarWeekView.goToToday();
                 break;
-            case R.id.action_settings:
-                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -128,8 +131,9 @@ public class CalendarActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(lastSelectedEventFlag, lastSelectedEvent);
+        outState.putInt(lastSelectedEventIdFlag, lastSelectedEventId);
         outState.putInt(currentNumOfDaysFlag, currentNumOfDays);
+        outState.putParcelable(lastViewedDateFlag, lastViewedDate);
     }
 
 
@@ -141,7 +145,6 @@ public class CalendarActivity extends AppCompatActivity {
         if(drawer != null){
             ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
                     R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-
             drawer.addDrawerListener(toggle);
             toggle.syncState();
         }
@@ -149,7 +152,8 @@ public class CalendarActivity extends AppCompatActivity {
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         if(navigationView != null){
             navigationView.setNavigationItemSelectedListener(
-                    new NavDrawerItemSelectedListener(CalendarActivity.this, drawer, getSupportFragmentManager()));
+                    new NavDrawerItemSelectedListener(CalendarActivity.this, drawer));
+            //Pre-select nav item
             navigationView.setCheckedItem(R.id.nav_cal_day);
         }
 
@@ -180,27 +184,40 @@ public class CalendarActivity extends AppCompatActivity {
         // Get a reference for the week view in the layout.
         calendarWeekView = (WeekView) findViewById(R.id.calander_weekView_widget);
 
-        calendarWeekView.setNumberOfVisibleDays(currentNumOfDays); //set inital layout format
-        setupDateTimeInterpreter(currentNumOfDays); //set inital format
+        calendarWeekView.setDateTimeInterpreter(new CalendarDateTimeInterpreter(currentNumOfDays));
 
+        //LISTENERS...
 
-        calendarWeekView.setNowLineColor(R.color.colorAccent);
-        calendarWeekView.setShowNowLine(true);
-        calendarWeekView.setShowDistinctWeekendColor(true);
-
-        setCalendarWeekViewCurrentHour();
-
+        // to get a callback when an event is pressed
         calendarWeekView.setOnEventClickListener(new CalendarEventClickListener(this));
-
-        // The week view has infinite scrolling horizontally. We have to provide the events of a
-        // month every time the month changes on the week view.
+        // to provide events to the calendar by months
         calendarWeekView.setMonthChangeListener(new CalendarMonthChangeListener(this));
-
-        // Set long press listener for events.
+        // to get a callback when an event is long pressed
         calendarWeekView.setEventLongPressListener(new CalendarEventLongPressListener());
-
-        // Set long press listener for empty view
+        //to get a callback when any empty space is long pressed
         calendarWeekView.setEmptyViewLongPressListener(new CalendarEmptyViewLongPressListener());
+
+
+
+        calendarWeekView.setScrollListener(new WeekView.ScrollListener() {
+            @Override
+            public void onFirstVisibleDayChanged(Calendar newFirstVisibleDay, Calendar oldFirstVisibleDay) {
+                updateLastViewedDateAndTime(newFirstVisibleDay);
+            }
+        });
+
+
+
+        //view configuration...
+
+        if(calendarWeekView != null) {
+            calendarWeekView.setNumberOfVisibleDays(currentNumOfDays);
+            calendarWeekView.setNowLineColor(R.color.colorAccent);
+            calendarWeekView.setShowNowLine(true);
+            calendarWeekView.setShowDistinctWeekendColor(true);
+            setCalendarWeekViewDateAndTime();
+        }
+
     }
 
 
@@ -208,33 +225,28 @@ public class CalendarActivity extends AppCompatActivity {
     /*
     * TODO: Shows details data for single event
     * */
-    public void showEventDetails( String eventName) {
-
-        Log.d("calendarActivity", Boolean.toString(dualPane));
+    public void showEventDetails(int eventId) {
 
         // The most recently selected event
-        lastSelectedEvent = eventName;
+        lastSelectedEventId = eventId;
 
-        // Check if we are in horizontal mode and if yes show dual pane
+        // Check if we are in horizontal mode and if yes show dual pane layout
         if (dualPane) {
 
-            // Create an object that represents the current FrameLayout that we will put the event data in
-            EventDetailsFragment eventDetailsFragment = (EventDetailsFragment) getSupportFragmentManager().findFragmentById(R.id.frame_event_details);
+            //get existing fragment from frame
+            EventDetailsFragment eventDetailsFragment = (EventDetailsFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.frame_event_details);
 
-            // When a DetailsFragment is created by calling newInstance the index for the data
-            // it is supposed to show is passed to it. If that index hasn't been assigned we must
-            // assign it in the if block
-            if (eventDetailsFragment == null || !eventDetailsFragment.getEventName().equalsIgnoreCase(eventName)) {
 
-                // Make the details fragment and give it the currently selected hero index
-                eventDetailsFragment = EventDetailsFragment.newInstance(eventName);
+            //if it doesnt exist or it isnt same as fragment already in there then...
+            if (eventDetailsFragment == null || eventDetailsFragment.getEventId() != lastSelectedEventId) {
 
-                // Start Fragment transactions
+                // Make new fragment with selected data
+                eventDetailsFragment = EventDetailsFragment.newInstance(eventId);
+
+                // replace old fragment with new fragment
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-
-                // Replace any other Fragment with our new Details Fragment with the right data
                 ft.replace(R.id.frame_event_details, eventDetailsFragment);
-
                 ft.commit();
             }
 
@@ -242,68 +254,58 @@ public class CalendarActivity extends AppCompatActivity {
 
             // Launch a new Activity to show our DetailsFragment
             Intent intent = new Intent();
-
-            // Define the class Activity to call
             intent.setClass(CalendarActivity.this, EventDetailsActivity.class);
 
             // Pass along the currently selected index assigned to the keyword index
-            intent.putExtra("eventName", eventName);
+            intent.putExtra(EventDetailsFragment.eventIdFlag, eventId);
 
-            // Call for the Activity to open
             startActivity(intent);
         }
     }
 
-    public void setupDateTimeInterpreter(final int currentNumOfDays) {
-
-        calendarWeekView.setDateTimeInterpreter(new DateTimeInterpreter() {
-            @Override
-            public String interpretDate(Calendar date) {
 
 
-                String weekdayStringFormat = "EEEE";
-                String dateStringFormat = "d MMM";
 
-                switch(currentNumOfDays){
-                    case 1:
-                        //use defaults
-                        break;
-                    case 3:
-                        weekdayStringFormat = "EEE";
-                        dateStringFormat = "d/M";
-                        break;
-                    case 7:
-                        weekdayStringFormat = "EEEEE";
-                        dateStringFormat = "d/M";
-                        break;
-                }
-
-                SimpleDateFormat weekdayNameFormat = new SimpleDateFormat(weekdayStringFormat, Locale.UK);
-                String weekday = weekdayNameFormat.format(date.getTime());
-                SimpleDateFormat format = new SimpleDateFormat(dateStringFormat, Locale.UK);
+    public void setCalendarWeekViewDateAndTime(){
 
 
-                return weekday.toUpperCase() + " " + format.format(date.getTime());
+        if(lastViewedDate == null){
+            //creates 'TODAY' date and sets lastViewedDate
+            Date date = new Date();
+            Calendar calendar = GregorianCalendar.getInstance();
+            calendar.setTime(date);
+            updateLastViewedDateAndTime(calendar);
+        }
 
-            }
 
-            @Override
-            public String interpretTime(int hour) {
-                return hour > 11 ? (hour - 12) + " PM" : (hour == 0 ? "12 AM" : hour + " AM");
-            }
-        });
+        Calendar calendar = GregorianCalendar.getInstance();
+        calendar.set(lastViewedDate.Year,
+                lastViewedDate.Month,
+                lastViewedDate.Date,
+                lastViewedDate.Hour,
+                0);
+
+        calendarWeekView.goToDate(calendar);
+        calendarWeekView.goToHour(lastViewedDate.Hour);
+
+    }
+
+    private void updateLastViewedDateAndTime(Calendar calendar){
+        if(lastViewedDate == null) {
+            lastViewedDate = new ParcelableCalendarDate();
+        }
+
+        lastViewedDate.Year = calendar.get(Calendar.YEAR);
+        lastViewedDate.Month = calendar.get(Calendar.MONTH);
+        lastViewedDate.Date = calendar.get(Calendar.DATE);
+
+        //have to use current hour because calander week view doesnt store current hour
+        Date date = new Date();
+        Calendar hourCalendar = GregorianCalendar.getInstance();
+        calendar.setTime(date);
+        lastViewedDate.Hour = hourCalendar.get(Calendar.HOUR_OF_DAY);
     }
 
 
-    public void setCalendarWeekViewCurrentHour(){
-
-        Date date = new Date();   // given date
-        Calendar calendar = GregorianCalendar.getInstance(); // creates a new calendar instance
-        calendar.setTime(date);   // assigns calendar to given date
-
-        int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
-
-        calendarWeekView.goToHour(currentHour);
-    }
 
 }

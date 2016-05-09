@@ -21,7 +21,7 @@ public class CalendarEventClickListener implements WeekView.EventClickListener {
 
     @Override
     public void onEventClick(WeekViewEvent event, RectF eventRect) {
-        //Toast.makeText(context, event.getName(), Toast.LENGTH_SHORT).show();
-        context.showEventDetails(event.getName());
+        //TODO use event id
+        context.showEventDetails((int)event.getId());
     }
 }
