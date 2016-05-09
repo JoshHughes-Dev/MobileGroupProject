@@ -22,9 +22,11 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -32,6 +34,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -39,12 +42,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
+
+import com.mobilegroupproject.studentorganiser.data.EventsDbHelper;
+import android.database.sqlite.SQLiteDatabase;
 
 public class ApiTestActivity extends Activity
         implements EasyPermissions.PermissionCallbacks {
@@ -61,6 +69,13 @@ public class ApiTestActivity extends Activity
     private static final String BUTTON_TEXT = "Call Google Calendar API";
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = { CalendarScopes.CALENDAR_READONLY };
+
+    private EventsDbHelper eventsDbHelper;
+    private SQLiteDatabase eventsDb;
+
+    public List<List<String>> eventsList = new ArrayList<>();
+    public String testString;
+
 
     /**
      * Create the main activity.
@@ -112,6 +127,16 @@ public class ApiTestActivity extends Activity
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
+
+        eventsDbHelper = new EventsDbHelper(getApplicationContext(),EventsDbHelper.DB_NAME,null,
+                com.mobilegroupproject.studentorganiser.data.EventsDbHelper.DB_VERSION);
+        eventsDb = eventsDbHelper.getWritableDatabase();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // refresh
     }
 
     /**
@@ -316,7 +341,7 @@ public class ApiTestActivity extends Activity
      * An asynchronous task that handles the Google Calendar API call.
      * Placing the API calls in their own task ensures the UI stays responsive.
      */
-    private class MakeRequestTask extends AsyncTask<Void, Void, List<String>> {
+    private class MakeRequestTask extends AsyncTask<Void, Void, Void> {
         private com.google.api.services.calendar.Calendar mService = null;
         private Exception mLastError = null;
 
@@ -331,22 +356,24 @@ public class ApiTestActivity extends Activity
 
         /**
          * Background task to call Google Calendar API.
+         *
          * @param params no parameters needed for this task.
          */
         @Override
-        protected List<String> doInBackground(Void... params) {
+        protected Void doInBackground(Void... params) {
             try {
-                // return getDataFromApi();
-                return convertEventsToString();
+                putApiDataInEventsDb(getDataFromApi());
+                //return convertEventsToString();
             } catch (Exception e) {
                 mLastError = e;
                 cancel(true);
-                return null;
             }
+            return null;
         }
 
         /**
          * Fetch a list of the next 10 events from the primary calendar.
+         *
          * @return List of Strings describing returned events.
          * @throws IOException
          */
@@ -367,49 +394,149 @@ public class ApiTestActivity extends Activity
                 List<Event> items = events.getItems();
 
                 for (Event event : items) {
-                    if(event.getCreator().get("email").toString().contains("@student.lboro.ac.uk")) {
+                    if (event.getCreator().get("email").toString().contains("@student.lboro.ac.uk")) {
+
                         DateTime startDateTime = event.getStart().getDateTime();
+                        DateTime endDateTime = event.getEnd().getDateTime();
 
-                        List<String> eventDetails = new ArrayList<>();
-
-                        if (startDateTime == null) {
-                            // All-day events don't have start times, so just use
-                            // the start date.
+                        if (startDateTime == null){
                             startDateTime = event.getStart().getDate();
                         }
 
-                        eventDetails.add(event.getSummary());
-                        eventDetails.add(startDateTime.toString());
-                        eventDetails.add(event.getLocation());
-                        eventDetails.add(event.getHangoutLink());
-                        eventDetails.add(event.getICalUID());
-                        eventDetails.add(event.getDescription());
-                        eventDetails.add(event.getCreator().toString());
-                        eventDetails.add(event.getColorId());
+                        List<String> eventDetails = new ArrayList<>();
+
+                        if (event.getSummary() == null) {
+                            eventDetails.add("emptyTitle");
+                        }
+                        else {
+                            eventDetails.add(event.getSummary());
+                        }
+
+                        eventDetails.add(convertDateTime(startDateTime,endDateTime).get(0));
+                        eventDetails.add(convertDateTime(startDateTime,endDateTime).get(1));
+                        eventDetails.add(convertDateTime(startDateTime,endDateTime).get(2));
+
+                        if (event.getLocation() == null) {
+                            eventDetails.add("emptyBuilding");
+                        }
+                        else {
+                            eventDetails.add(event.getLocation());
+                        }
+
+                        if (event.getHangoutLink() == null) {
+                            eventDetails.add("emptyHangout");
+                        }
+                        else {
+                            eventDetails.add(event.getHangoutLink());
+                        }
+
+                        if (event.getCreator() == null) {
+                            eventDetails.add("emptyCreator");
+                        }
+                        else {
+                            eventDetails.add(event.getCreator().toString());
+                        }
+
+                        if (event.getColorId() == null) {
+                            eventDetails.add("emptyColour");
+                        }
+                        else {
+                            eventDetails.add(event.getColorId());
+                        }
+
+                        if (event.getDescription() == null) {
+                            eventDetails.add("emptyDescription");
+                        }
+                        else {
+                            eventDetails.add(event.getDescription());
+                        }
+
+                        if (event.getICalUID() == null) {
+                            eventDetails.add("emptyUid");
+                        }
+                        else {
+                            eventDetails.add(event.getICalUID());
+                        }
 
                         eventMasterList.add(eventDetails);
                     }
                 }
 
             }
-                return eventMasterList;
+            return eventMasterList;
         }
 
-        private List<String> convertEventsToString() throws IOException {   // Test for calendar converter
-            List<List<String>> s = getDataFromApi();
+        public List<String> convertDateTime(DateTime startDateTime, DateTime endDateTime) {
+            List<String> converted = new ArrayList<>();
 
-            List<String> list = new ArrayList<>();
+            //Get date from startDateTime and add to return variable.
+            SimpleDateFormat apiFormat = new SimpleDateFormat("yyyy-mm-dd");
+            SimpleDateFormat targetFormat = new SimpleDateFormat("dd-mm-yyyy");
 
-                    for (int i=0; i < s.size(); i++) {
-                        list.add(s.get(i).get(0) + " - " + s.get(i).get(1) + " ::::: " + s.get(i).get(6).toString().toLowerCase());
-                    }
+            //Check for all day and get times from startDateTime, then add to return variable.
+            if(startDateTime.toString().length() < 11){ // Checking if startDateTime is a time or a date. A date will be larger then 5 characters and a time won't be.
+                Log.d("NOT_TIME", startDateTime.toString());
+                //converted.add("DATE AS NO TIME GIVEN.");
+                try {
+                    converted.add(targetFormat.format(apiFormat.parse(startDateTime.toString())));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                converted.add("00:00");
+                converted.add("23:59");
+            }
+            else{
+                Log.d("YES_TIME", startDateTime.toString().substring(0, 9));
+                try {
+                    converted.add(targetFormat.format(apiFormat.parse(startDateTime.toString().substring(0, 9))));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                converted.add(startDateTime.toString().substring(11, 16));
+                Log.d("GIMME DAT START TIME", startDateTime.toString().substring(11, 16));
+                //converted.add(endDateTime);
+                Log.d("GIMME DAT END TIME", endDateTime.toString().substring(11, 16));
+                converted.add(endDateTime.toString().substring(11, 16));
+            }
 
-            return list;
-
+            return converted;
         }
+
+        public void putApiDataInEventsDb(List<List<String>> eventMasterList) {
+            eventsDbHelper.clearTable("EVENTS_TABLE");
+
+            ContentValues values = new ContentValues();
+            for (int i = 0; i < eventMasterList.size(); i++) {
+                values.put("TITLE", eventMasterList.get(i).get(0));
+                values.put("DATE", eventMasterList.get(i).get(1));
+                values.put("STARTTIME", eventMasterList.get(i).get(2));
+                values.put("ENDTIME", eventMasterList.get(i).get(3));
+                values.put("BUILDING", eventMasterList.get(i).get(4));
+                values.put("HANGOUT_LINK", eventMasterList.get(i).get(5));
+                values.put("CREATOR", eventMasterList.get(i).get(6));
+                values.put("COLOUR_ID", eventMasterList.get(i).get(7));
+                values.put("DESCRIPTION", eventMasterList.get(i).get(8));
+                values.put("UID", eventMasterList.get(i).get(9));
+
+                eventsDb.insert("EVENTS_TABLE", null, values);
+            }
+        }
+
+//        private List<String> convertEventsToString() throws IOException {   // Test for calendar converter
+//            List<List<String>> s = getDataFromApi();
+//
+//            List<String> list = new ArrayList<>();
+//
+//                    for (int i=0; i < s.size(); i++) {
+//                        list.add(s.get(i).get(0) + " - " + s.get(i).get(1) + " ::::: " + s.get(i).get(6).toString().toLowerCase());
+//                    }
+//
+//            return list;
+//
+//        }
 
         private List<String> getCalendarIds() throws IOException {
-            String pageToken=null;
+            String pageToken = null;
             List<String> calendarIds = new ArrayList<>();
 
             do {
@@ -417,9 +544,9 @@ public class ApiTestActivity extends Activity
                 List<CalendarListEntry> items = calendarList.getItems();
 
                 for (CalendarListEntry calendarListEntry : items) {
-                 calendarIds.add(calendarListEntry.getId());
+                    calendarIds.add(calendarListEntry.getId());
                 }
-                pageToken=calendarList.getNextPageToken();
+                pageToken = calendarList.getNextPageToken();
             } while (pageToken != null);
             return calendarIds;
         }
@@ -430,14 +557,77 @@ public class ApiTestActivity extends Activity
             mProgress.show();
         }
 
-        @Override
-        protected void onPostExecute(List<String> output) {
-            mProgress.hide();
-            if (output == null || output.size() == 0) {
-                mOutputText.setText("No results returned.");
+        public void populateEventsList() {
+
+            String[] columns = {
+                    "TITLE", "DATE", "STARTTIME", "ENDTIME", "BUILDING", "HANGOUT_LINK", "CREATOR",
+                    "COLOUR_ID", "DESCRIPTION", "UID"
+            };
+
+            Cursor c = eventsDb.query(
+                    "EVENTS_TABLE",
+                    columns,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+
+            if (c.moveToFirst()) {
+                //testString = c.getString(c.getColumnIndex("UID"));
+                //Log.d("hello",testString);
+                do {
+                    Log.d("hello TITLE",c.getString(c.getColumnIndex("TITLE")));
+                    Log.d("hello DATE",c.getString(c.getColumnIndex("DATE")));
+                    Log.d("hello STARTTIME",c.getString(c.getColumnIndex("STARTTIME")));
+                    Log.d("hello ENDTIME", c.getString(c.getColumnIndex("ENDTIME")));
+                    Log.d("hello BUILDING",c.getString(c.getColumnIndex("BUILDING")));
+                    Log.d("hello HANGOUT_LINK",c.getString(c.getColumnIndex("HANGOUT_LINK")));
+                    Log.d("hello CREATOR",c.getString(c.getColumnIndex("CREATOR")));
+                    Log.d("hello COLOUR_ID",c.getString(c.getColumnIndex("COLOUR_ID")));
+                    Log.d("hello DESCRIPTION",c.getString(c.getColumnIndex("DESCRIPTION")));
+                    Log.d("hello UID",c.getString(c.getColumnIndex("UID")));
+
+                    List<String> eventData = new ArrayList<>();
+                    eventData.add(c.getString(c.getColumnIndex("TITLE")));
+                    eventData.add(c.getString(c.getColumnIndex("DATE")));
+                    eventData.add(c.getString(c.getColumnIndex("STARTTIME")));
+                    eventData.add(c.getString(c.getColumnIndex("ENDTIME")));
+                    eventData.add(c.getString(c.getColumnIndex("BUILDING")));
+                    eventData.add(c.getString(c.getColumnIndex("HANGOUT_LINK")));
+                    eventData.add(c.getString(c.getColumnIndex("CREATOR")));
+                    eventData.add(c.getString(c.getColumnIndex("COLOUR_ID")));
+                    eventData.add(c.getString(c.getColumnIndex("DESCRIPTION")));
+                    eventData.add(c.getString(c.getColumnIndex("UID")));
+                    eventsList.add(eventData);
+                } while (c.moveToNext());
             } else {
-                output.add(0, "Data retrieved using the Google Calendar API:");
-                mOutputText.setText(TextUtils.join("\n", output));
+                List<String> errorData = new ArrayList<>();
+                errorData.add("error TITLE");
+                errorData.add("error DATE");
+                errorData.add("error STARTTIME");
+                errorData.add("error ENDTIME");
+                errorData.add("error BUILDING");
+                errorData.add("error HANGOUT_LINK");
+                errorData.add("error CREATOR");
+                errorData.add("error COLOUR_ID");
+                errorData.add("error DESCRIPTION");
+                errorData.add("error UID");
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Void output) {
+
+            populateEventsList();
+
+            mProgress.hide();
+
+            for(int i=0; i < eventsList.size(); i++){
+                mOutputText.append(TextUtils.join("\n", eventsList.get(i)));
+                //mOutputText.append(eventsList.get(i).get(1));
+                mOutputText.append("\n");
             }
         }
 
