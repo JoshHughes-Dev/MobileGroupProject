@@ -23,16 +23,14 @@ public class EventsDbHelper extends SQLiteOpenHelper{
         myDB = db;
 
         String query = "CREATE TABLE IF NOT EXISTS EVENTS_TABLE ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "TITLE TEXT," +
-                "DATE TEXT," +
-                "STARTTIME TEXT," +
-                "ENDTIME TEXT," +
-                "BUILDING TEXT," +
-                "HANGOUT_LINK TEXT," +
-                "CREATOR TEXT," +
-                "COLOUR_ID TEXT," +
+                "TITLE TEXT NOT NULL," +
+                "DATETIME TEXT NOT NULL," +
+                "BUILDING TEXT NOT NULL," +
+                "HANGOUT_LINK TEXT NOT NULL," +
+                "CREATOR TEXT NOT NULL," +
+                "COLOUR_ID TEXT NOT NULL, " +
                 "DESCRIPTION TEXT," +
-                "UID TEXT);";
+                "UID TEXT NOT NULL);";
 
         db.execSQL(query);
 
