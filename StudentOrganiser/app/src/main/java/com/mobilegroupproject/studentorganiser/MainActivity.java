@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.mobilegroupproject.studentorganiser.activities.CalendarActivity;
-import com.mobilegroupproject.studentorganiser.activities.ApiTestActivity;
+import com.mobilegroupproject.studentorganiser.activities.FetchEventsActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void StartApiTestIntent() {
-        Intent intent = new Intent(this, ApiTestActivity.class);
+        Intent intent = new Intent(this, FetchEventsActivity.class);
         startActivity(intent);
     }
 

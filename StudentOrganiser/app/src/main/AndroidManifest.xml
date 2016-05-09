@@ -31,7 +31,7 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.ApiTestActivity"></activity>
+        <activity android:name=".activities.FetchEventsActivity"></activity>
     </application>
 
 </manifest>
