@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+
     private void StartCalendarIntent() {
         Intent intent = new Intent(this, CalendarActivity.class);
         startActivity(intent);
