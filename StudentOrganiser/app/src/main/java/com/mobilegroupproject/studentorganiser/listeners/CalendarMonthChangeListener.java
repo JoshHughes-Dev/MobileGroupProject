@@ -6,6 +6,7 @@ import com.alamkanak.weekview.MonthLoader;
 import com.alamkanak.weekview.WeekViewEvent;
 import com.mobilegroupproject.studentorganiser.R;
 import com.mobilegroupproject.studentorganiser.activities.CalendarActivity;
+import com.mobilegroupproject.studentorganiser.model.ExtendedWeekViewEvent;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -15,11 +16,11 @@ import java.util.List;
 public class CalendarMonthChangeListener implements MonthLoader.MonthChangeListener {
 
 
-    protected List<WeekViewEvent> events;
+    protected List<ExtendedWeekViewEvent> events;
 
     protected CalendarActivity context;
 
-    public CalendarMonthChangeListener(CalendarActivity c, ArrayList<WeekViewEvent> es){
+    public CalendarMonthChangeListener(CalendarActivity c, ArrayList<ExtendedWeekViewEvent> es){
         context = c;
         events = es;
     }
@@ -33,11 +34,11 @@ public class CalendarMonthChangeListener implements MonthLoader.MonthChangeListe
      * @return a list of the events happening <strong>during the specified month</strong>.
      */
     @Override
-    public List<? extends WeekViewEvent> onMonthChange(int newYear, int newMonth) {
+    public List<? extends ExtendedWeekViewEvent> onMonthChange(int newYear, int newMonth) {
 
         // Return only the events that matches newYear and newMonth.
-        ArrayList<WeekViewEvent> matchedEvents = new ArrayList<WeekViewEvent>();
-        for (WeekViewEvent event : events) {
+        ArrayList<ExtendedWeekViewEvent> matchedEvents = new ArrayList<ExtendedWeekViewEvent>();
+        for (ExtendedWeekViewEvent event : events) {
             if (eventMatches(event, newYear, newMonth)) {
                 matchedEvents.add(event);
             }

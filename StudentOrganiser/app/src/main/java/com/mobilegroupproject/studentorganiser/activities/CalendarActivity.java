@@ -6,7 +6,6 @@ import android.os.Bundle;
 
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -21,18 +20,16 @@ import android.widget.Toast;
 
 import com.alamkanak.weekview.WeekView;
 
-import com.alamkanak.weekview.WeekViewEvent;
-import com.alamkanak.weekview.WeekViewLoader;
 import com.mobilegroupproject.studentorganiser.CalenderUITestData;
 import com.mobilegroupproject.studentorganiser.R;
 import com.mobilegroupproject.studentorganiser.fragments.EventDetailsFragment;
-import com.mobilegroupproject.studentorganiser.fragments.CalenderViewDataFragment;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarDateTimeInterpreter;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarEmptyViewLongPressListener;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarEventClickListener;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarEventLongPressListener;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarMonthChangeListener;
 import com.mobilegroupproject.studentorganiser.listeners.NavDrawerItemSelectedListener;
+import com.mobilegroupproject.studentorganiser.model.ExtendedWeekViewEvent;
 import com.mobilegroupproject.studentorganiser.model.ParcelableCalendarDate;
 
 
@@ -40,23 +37,22 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.List;
 
 
 public class CalendarActivity extends AppCompatActivity {
 
 
-    private final String lastSelectedEventIdFlag = "lastSelectedEventId";
-    private final String currentNumOfDaysFlag = "currentNumOfDays";
-    private final String lastViewedDateFlag = "lastViewedDate";
+    private final String LAST_SELECTED_EVENT_ID = "lastSelectedEventId";
+    private final String CURRENT_NUM_OF_DAYS = "currentNumOfDays";
+    private final String LAST_VIEWED_DATE = "lastViewedDate";
+    private final String EVENTS_DATA = "eventsData";
 
     private WeekView calendarWeekView;
     public int currentNumOfDays = 1;
     protected int lastSelectedEventId = 0;
     protected boolean dualPane = false;
     protected ParcelableCalendarDate lastViewedDate;
-    protected ArrayList<WeekViewEvent> events;
-    protected CalenderViewDataFragment dataFragment;
+    protected ArrayList<ExtendedWeekViewEvent> events;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,12 +63,14 @@ public class CalendarActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         if(savedInstanceState != null){
-            currentNumOfDays = savedInstanceState.getInt(currentNumOfDaysFlag, 1);
-            lastSelectedEventId = savedInstanceState.getInt(lastSelectedEventIdFlag);
-            lastViewedDate = savedInstanceState.getParcelable(lastViewedDateFlag);
+            currentNumOfDays = savedInstanceState.getInt(CURRENT_NUM_OF_DAYS, 1);
+            lastSelectedEventId = savedInstanceState.getInt(LAST_SELECTED_EVENT_ID);
+            lastViewedDate = savedInstanceState.getParcelable(LAST_VIEWED_DATE);
+            events = savedInstanceState.getParcelableArrayList(EVENTS_DATA);
         }
 
         initDataSource();
+
 
         initDrawer(toolbar);
 
@@ -107,14 +105,6 @@ public class CalendarActivity extends AppCompatActivity {
 
     }
 
-    /*when activity is destroyed, need to retain events data in data fragment*/
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        // store the data in the fragment
-        dataFragment.setData(events);
-    }
-
     /* creates nav bar pop up menu*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -145,30 +135,17 @@ public class CalendarActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(lastSelectedEventIdFlag, lastSelectedEventId);
-        outState.putInt(currentNumOfDaysFlag, currentNumOfDays);
-        outState.putParcelable(lastViewedDateFlag, lastViewedDate);
+        outState.putInt(LAST_SELECTED_EVENT_ID, lastSelectedEventId);
+        outState.putInt(CURRENT_NUM_OF_DAYS, currentNumOfDays);
+        outState.putParcelable(LAST_VIEWED_DATE, lastViewedDate);
+        outState.putParcelableArrayList(EVENTS_DATA, events);
     }
 
     private void initDataSource(){
-
-        // find the retained fragment on activity restarts
-        FragmentManager fm = getSupportFragmentManager();
-        dataFragment = (CalenderViewDataFragment) fm.findFragmentByTag("data");
-
-        // create the fragment and data the first time
-        if (dataFragment == null) {
-
-            dataFragment = new CalenderViewDataFragment();
-            fm.beginTransaction().add(dataFragment, "data").commit();
-
-            //load data into data fragment
+        if(events == null || events.size() == 0) {
             CalenderUITestData calenderUITestData = new CalenderUITestData(this);
-            dataFragment.setData(calenderUITestData.CreateTestData());
+            events = calenderUITestData.CreateTestData();
         }
-
-        //get data from data fragment and bind to local var
-        events = dataFragment.getData();
     }
 
 
@@ -259,6 +236,7 @@ public class CalendarActivity extends AppCompatActivity {
 
         // The most recently selected event
         lastSelectedEventId = eventId;
+        ExtendedWeekViewEvent selectedEvent = getEvent(eventId);
 
         // Check if we are in horizontal mode and if yes show dual pane layout
         if (dualPane) {
@@ -269,10 +247,11 @@ public class CalendarActivity extends AppCompatActivity {
 
 
             //if it doesnt exist or it isnt same as fragment already in there then...
-            if (eventDetailsFragment == null || eventDetailsFragment.getEventId() != lastSelectedEventId) {
+            if (eventDetailsFragment == null || eventDetailsFragment.getEvent() == null || eventDetailsFragment.getEventId() != lastSelectedEventId) {
+
 
                 // Make new fragment with selected data
-                eventDetailsFragment = EventDetailsFragment.newInstance(eventId);
+                eventDetailsFragment = EventDetailsFragment.newInstance(selectedEvent);
 
                 // replace old fragment with new fragment
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -286,8 +265,7 @@ public class CalendarActivity extends AppCompatActivity {
             Intent intent = new Intent();
             intent.setClass(CalendarActivity.this, EventDetailsActivity.class);
 
-            // Pass along the currently selected index assigned to the keyword index
-            intent.putExtra(EventDetailsFragment.eventIdFlag, eventId);
+            intent.putExtra(EventDetailsFragment.SELECTED_EVENT_DATA, getEvent(eventId));
 
             startActivity(intent);
         }
@@ -334,6 +312,15 @@ public class CalendarActivity extends AppCompatActivity {
         lastViewedDate.Hour = hourCalendar.get(Calendar.HOUR_OF_DAY);
     }
 
+
+    public ExtendedWeekViewEvent getEvent(int eventId){
+        for(ExtendedWeekViewEvent ewve : events){
+            if(ewve.getId() == eventId){
+                return ewve;
+            }
+        }
+        return null;
+    }
 
 
 }
