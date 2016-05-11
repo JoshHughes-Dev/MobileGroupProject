@@ -37,4 +37,5 @@ dependencies {
     compile 'com.github.alamkanak:android-week-view:1.2.6'
     compile 'com.google.android.gms:play-services-identity:8.4.0'
     compile 'pub.devrel:easypermissions:0.1.5'
+    compile 'me.everything:providers-android:1.0.1'
 }
