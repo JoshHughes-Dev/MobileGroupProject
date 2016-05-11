@@ -2,7 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{fancyvrb,fullpage,framed,graphicx}
 
-\graphicspath{ {c:/users/coas7/desktop/} }
+\graphicspath{ {c:/users/coas7/desktop/ObviouslyChangeThisToTheCorrectPath/ } }
 
 \title{15COC155 Mobile Application Development: \\
     Student Organiser app}
@@ -50,11 +50,9 @@ The following features are likely to be included in some form:
 \end{itemize}
 
 Some preliminary interface designs are included in a separate accompanying document, outlining some of the planned features and how they will fit to the device screen width. Diagrams \ref{d1}, \ref{d2} and \ref{d3} below provide an indication into the planned direction of the user interface (UI).
-
-\includegraphics{d1.png}
-\includegraphics{d2.png}
-\includegraphics{d3.png}
-
+\newline
+\noindent\emph{***UI original diagrams here***}
+\newline
 \section{Implementation}
 This section describes the app in terms of its fulfillment of the initial requirements set out by the lecturer. The app largely meets the requirements while providing useful function and in that sense can be argued to be a success. Students are able to benefit from the app's statistics logging, convenient navigation service (in the case of particular buildings on the campus) and helpful sharing tools provided that they have added their university calendar to their Android phone. Despite these positives, the app is is somewhat limited - both in part by our technical implementation and in part by traits inherent in its design. 
 
@@ -67,23 +65,22 @@ This section describes the technical fulfillment of the initial requirements alo
 \subsubsection{Distinct UI Screens}
 Many distinctly different screens are used to display information appropriately, e.g. the day view, the 3-day view, the week view and the event details view. The following screenshots \ref{uiDay}, \ref{uiThreeDay}, \ref{uiWeek} and \ref{uiEventDetails} respectively show these different screens.
 
-\includegraphics{uiDay}
-\includegraphics{uiThreeDay}
-\includegraphics{uiWeek}
-\includegraphics{uiEventDetails}
+\emph{***UI diagrams here***}
 
 \subsubsection{Compliance with the Activity Lifecycle}
 The various application components are used appropriately and are able to communicate with each other, resulting in a stable app that can be easily managed by the OS - in particular each Activity, Service and BroadcastReceiver are declared and used appropriately. \emph{*** further detail about classes when finished*** }
 \subsubsection{Use of Permissions}
 The app requires the following permissions:\\
+    \newline
     \indent android.permission.INTERNET\\
-    \indent android.permission.ACCESS_NETWORK_STATE\\
-    \indent android.permission.GET_ACCOUNTS\\
+    \indent android.permission.ACCESS\_NETWORK\_STATE\\
+    \indent android.permission.GET\_ACCOUNTS\\
     \indent \emph{... other permissions ...}\\
+    \newline
 Only those permissions that are strictly required by the app are requested. In this way the app can claim to be responsible with its use of permissions, an important trait in the current age where privacy is of increasing concern in the minds of many people. 
 
 \subsubsection{Use of Intents}
-\emph{***maps - allows user to choose how to open map link e.g. if Google Maps not installed***}
+The app makes use of an external Intent to allow the user to choose how to open a maps link in the event that, for example, Google Maps not installed...
 \subsubsection{Custom ContentProvider}
 The app makes use of a custom Calendar Provider...
 \subsubsection{Custom Loader}
@@ -104,6 +101,6 @@ When the device is not online, the app notifies the user that the latest calenda
 A swipe gesture is utilised to access the navigation menu drawer from the left of the screen.
 
 \section{Conclusion}
-conclusion
+Top quality product m8.
 
 \end{document}
