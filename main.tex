@@ -17,9 +17,9 @@
 \newpage
 
 \section{Introduction}
-We were asked to propose, specify and develop a native Android application (app) fulfilling certain technical requirements. The app we developed is helps students maintain engagement with their course at Loughborough University by integrating with their university provided calendar.
+We were asked to propose, specify and develop a native Android application (app) fulfilling certain technical requirements. The app we developed helps students maintain engagement with their course at Loughborough University by integrating with their university calendar and tracking their progress on attendance.
 
-The app largely meets the initial mandatory and optional specifications. This report summarises the application, describes the specifics of its design with some explanation into methodology used and discusses the app's limitations.
+The app largely meets the initial mandatory and optional specifications. This report summarises the application, describes the specifics of its design with some explanation into the methodology used and discusses some of the app's limitations.
 
 \section{Specification}
 Maintaining ongoing motivation and reliably attending contact sessions are challenges experienced by many university students on long full-time courses. Since it has repeatedly been shown that there is strong positive correlation between attendance and performance, it can be confidently said that waning motivation in students constitutes for them a real, tangible problem (in addition to the obviously negative, but nonetheless subjective impact on their mood). 
@@ -56,21 +56,54 @@ Some preliminary interface designs are included in a separate accompanying docum
 \includegraphics{d3.png}
 
 \section{Implementation}
-This section describes the app in terms of the initial requirements set out by the lecturer.
+This section describes the app in terms of its fulfillment of the initial requirements set out by the lecturer. The app largely meets the requirements while providing useful function and in that sense can be argued to be a success. Students are able to benefit from the app's statistics logging, convenient navigation service (in the case of particular buildings on the campus) and helpful sharing tools provided that they have added their university calendar to their Android phone. Despite these positives, the app is is somewhat limited - both in part by our technical implementation and in part by traits inherent in its design. 
 
-\subsection{Distinct UI Screens}
-\subsection{Compliance with the Activity Lifecycle}
-\subsection{Use of Permissions}
-\subsection{Use of Intents}
+\subsection{Limitations}
+The app is unable to ...
+
+\subsection{Fulfillment of Initial Requirements}
+This section describes the technical fulfillment of the initial requirements along with screenshots to demonstrate.
+
+\subsubsection{Distinct UI Screens}
+Many distinctly different screens are used to display information appropriately, e.g. the day view, the 3-day view, the week view and the event details view. The following screenshots \ref{uiDay}, \ref{uiThreeDay}, \ref{uiWeek} and \ref{uiEventDetails} respectively show these different screens.
+
+\includegraphics{uiDay}
+\includegraphics{uiThreeDay}
+\includegraphics{uiWeek}
+\includegraphics{uiEventDetails}
+
+\subsubsection{Compliance with the Activity Lifecycle}
+The various application components are used appropriately and are able to communicate with each other, resulting in a stable app that can be easily managed by the OS - in particular each Activity, Service and BroadcastReceiver are declared and used appropriately. \emph{*** further detail about classes when finished*** }
+\subsubsection{Use of Permissions}
+The app requires the following permissions:\\
+    \indent android.permission.INTERNET\\
+    \indent android.permission.ACCESS_NETWORK_STATE\\
+    \indent android.permission.GET_ACCOUNTS\\
+    \indent \emph{... other permissions ...}\\
+Only those permissions that are strictly required by the app are requested. In this way the app can claim to be responsible with its use of permissions, an important trait in the current age where privacy is of increasing concern in the minds of many people. 
+
+\subsubsection{Use of Intents}
 \emph{***maps - allows user to choose how to open map link e.g. if Google Maps not installed***}
-\subsection{Custom ContentProvider}
-\subsection{Custom Loader}
-\subsection{Use of Local storage}
-\subsection{Use of Broadcast events}
-\subsection{Custom View}
-\subsection{Use of ShareActionProvider}
-\subsection{Use of Services}
-\subsection{Use of Notifications}
-\subsection{Use of Touch gestures}
+\subsubsection{Custom ContentProvider}
+The app makes use of a custom Calendar Provider...
+\subsubsection{Custom Loader}
+The app makes use of a custom Loader in tandem with its custom Calendar Provider...
+\subsubsection{Use of Local storage}
+Local storage is used to store the calendar data provided by the Calendar Provider in the form of a SQLite database.
+\subsubsection{Use of Broadcast events}
+The app makes use of Android's BroadcastReceiver class...
+\subsubsection{Custom View}
+The app makes use of a custom View...
+\subsubsection{Use of ShareActionProvider}
+The app makes use of Android's ShareActionProvider to allow users to share their personal commentary on events that they have in common. In this way users are able to append additional information to a shared event, something they would not be able to do otherwise (events managed by the university's shared calendars cannot be edited by users).
+\subsubsection{Use of Services}
+The app makes use of several Android services including LocationManager to provide users with directions to buildings on the university campus... 
+\subsubsection{Use of Notifications}
+When the device is not online, the app notifies the user that the latest calendar data may not be being used. In practice this is unlikely to represent a significant issue for users (how often does the university really update its shared calendars?) but it is still appropriate for the user to be informed.
+\subsubsection{Use of Touch gestures}
+A swipe gesture is utilised to access the navigation menu drawer from the left of the screen.
+
+\section{Conclusion}
+conclusion
 
 \end{document}
