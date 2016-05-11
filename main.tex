@@ -1,0 +1,76 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyvrb,fullpage,framed,graphicx}
+
+\graphicspath{ {c:/users/coas7/desktop/} }
+
+\title{15COC155 Mobile Application Development: \\
+    Student Organiser app}
+\author{Group 8 - Dan Cohen, Joshua Hughes, Niall Rose \& Alex Smith}
+\date{May 2016}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+We were asked to propose, specify and develop a native Android application (app) fulfilling certain technical requirements. The app we developed is helps students maintain engagement with their course at Loughborough University by integrating with their university provided calendar.
+
+The app largely meets the initial mandatory and optional specifications. This report summarises the application, describes the specifics of its design with some explanation into methodology used and discusses the app's limitations.
+
+\section{Specification}
+Maintaining ongoing motivation and reliably attending contact sessions are challenges experienced by many university students on long full-time courses. Since it has repeatedly been shown that there is strong positive correlation between attendance and performance, it can be confidently said that waning motivation in students constitutes for them a real, tangible problem (in addition to the obviously negative, but nonetheless subjective impact on their mood). 
+
+The scalable, inherently mathematical nature of technology makes it an ideal tool with which to solve the kind of organisation problem previously outlined. Furthermore, most students are young and many have access to personal technology devices such as mobile phones and tablets with which they already manage their personal and social commitments. 
+
+It would seem then that there exists space for a technological solution to the problem, both in terms of the appropriateness of technology here and in terms of the students' ability to incorporate such a tool into their pre-existing routine.
+
+The proposed application will therefore be a university "personal assistant / organiser" mobile application on the Android platform for university students (specifically of Loughborough University), designed to help students track and encourage their own attendance to lectures/seminars/labs as well as to help them organise other events such as group assignment meetings and deadlines. The application differs from a simple calendar application in that it focuses heavily on tracking one's own progress, providing myriad feedback through dialogues and animations designed to stimulate and encourage engagement.
+
+The application's objective is provide students the power to address their own lecture attendance and organise their day-to-day activities and commitments. The application is primarily designed from the student's perspective as a self management tool rather than to assist the university's own internal attendance monitoring, although wide adoption would undoubtedly provide indirect benefit to the university as well.
+
+The following features are likely to be included in some form:
+
+\begin{itemize}
+    \item Integration of the user's Loughborough University (Google) account - supporting use of Android's built-in account manager with which the user will doubtless be familiar.
+    \item Synchronisation with Google Calendar - users may export and import events to and from their existing university calendar.
+    \item Locally stored information supporting geolocation tracking - e.g. names and geolocation coordinates of campus buildings.
+    \item Push notification reminders of upcoming events using location data - e.g. ``Your upcoming [lecture] is [2 miles] away and starts in [20 minutes]!''.
+    \item Automatic attendance registration through two-step geolocation tracking - the user's location can be tracked twice during a session's time slot, minimising the ability of the user to deceive the application into falsely registering attendance. 
+    \item Responsible geolocation tracking - tracking will be carried out only when strictly necessary in order to preserve device resources.
+    \item Interfacing with external applications - e.g. a "get directions" action may prompt the Google Maps application to carry out an operation.
+    \item Full compliance with Google material design - the application will sit flush alongside other applications and present an intuitive and familiar interface to the user.
+    \item Intuitive touch gestures - e.g. double tap to create a new entry, long press and drag to move events, etc.
+    \item Sharing support - a share button can allow the user to share new events with other users who may be interested.
+    \item Frequent, informative feedback - features such as weekly and daily statistics and graphical weekly summaries will allow users to track and visualise their progress. Notifications help users to keep engaged, e.g. "You didn't attend this lecture last week, try attending it this week."
+    \item Gamification of progress feedback - presenting features of the application as a game in order to enhance user feeling of reward.
+\end{itemize}
+
+Some preliminary interface designs are included in a separate accompanying document, outlining some of the planned features and how they will fit to the device screen width. Diagrams \ref{d1}, \ref{d2} and \ref{d3} below provide an indication into the planned direction of the user interface (UI).
+
+\includegraphics{d1.png}
+\includegraphics{d2.png}
+\includegraphics{d3.png}
+
+\section{Implementation}
+This section describes the app in terms of the initial requirements set out by the lecturer.
+
+\subsection{Distinct UI Screens}
+\subsection{Compliance with the Activity Lifecycle}
+\subsection{Use of Permissions}
+\subsection{Use of Intents}
+\emph{***maps - allows user to choose how to open map link e.g. if Google Maps not installed***}
+\subsection{Custom ContentProvider}
+\subsection{Custom Loader}
+\subsection{Use of Local storage}
+\subsection{Use of Broadcast events}
+\subsection{Custom View}
+\subsection{Use of ShareActionProvider}
+\subsection{Use of Services}
+\subsection{Use of Notifications}
+\subsection{Use of Touch gestures}
+
+\end{document}
