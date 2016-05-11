@@ -1,13 +1,12 @@
 package com.mobilegroupproject.studentorganiser.data;
 
-import android.Manifest;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.net.Uri;
 import android.provider.CalendarContract.Calendars;
-import android.support.v4.content.ContextCompat;
+import android.provider.CalendarContract.Events;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by niall on 11/05/2016.
@@ -20,44 +19,93 @@ public class CalendarProvider {
         this.context = context;
     }
 
-    public String getCalendarDetails() {
+    public List<Calendar> getCalendarDetails() throws SecurityException {
+
+        Calendar calendar = new Calendar();
+
+        List<Calendar> calendarList = new ArrayList<>();
 
         String[] projection =
                 new String[]{
                         Calendars._ID,
-                        Calendars.NAME,
                         Calendars.CALENDAR_DISPLAY_NAME,
                         Calendars.ACCOUNT_NAME,
-                        Calendars.ACCOUNT_TYPE,
                         Calendars.OWNER_ACCOUNT
                 };
 
-        String selection = "((" + Calendars.ACCOUNT_NAME + " = ?))";
+        String selection = "((" + Calendars.ACCOUNT_NAME + " LIKE ?))";
 
-        String[] selectionArgs = new String[] {"A.Smith3-11@student.lboro.ac.uk"};
+        String[] selectionArgs = new String[] {"%"+"@student.lboro.ac.uk"};
 
-        String displayName = null;
-        long id = 0;
-
-        int permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR);
-        if(permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            return null;
+        Cursor calCursor = context.getContentResolver().
+                query(Calendars.CONTENT_URI,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null);
+        while (calCursor.moveToNext()) {
+            calendar = new Calendar();
+            calendar.id = calCursor.getString(0);
+            calendar.calendarName = calCursor.getString(1);
+            calendar.accountName = calCursor.getString(2);
+            calendar.ownerAccount = calCursor.getString(3);
+            calendarList.add(calendar);
         }
-        else {
-            Cursor calCursor = context.getContentResolver().
-                    query(Calendars.CONTENT_URI,
-                            projection,
-                            selection,
-                            selectionArgs,
-                            null);
-            while (calCursor.moveToNext()) {
-                    id = calCursor.getLong(0);
-                    displayName = calCursor.getString(2);
-                    return displayName;
-                    // …
-            }
-            }
-        return displayName;
+
+        return calendarList;
     }
 
+    public List<Event> getEvents(String calendarId) throws SecurityException {
+        Event event = new Event();
+
+        List<Event> eventList = new ArrayList<>();
+
+        String[] projection =
+                new String[]{
+                        Events._SYNC_ID,
+                        Events.TITLE,
+                        Events.DTSTART,
+                        Events.DTEND,
+                        Events.EVENT_LOCATION,
+                        Events.ORGANIZER,
+                        Events.DESCRIPTION
+                };
+
+        String selection = "((" + Events.CALENDAR_ID + " = ?))";
+
+        String[] selectionArgs = new String[] {calendarId};
+
+        Cursor calCursor = context.getContentResolver().
+                query(Events.CONTENT_URI,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null);
+        while (calCursor.moveToNext()) {
+            event = new Event();
+            event.id = calCursor.getString(0);
+            event.title = calCursor.getString(1);
+            event.startTime = Event.convertMilliToTime(calCursor.getString(2));
+            event.endTime = Event.convertMilliToTime(calCursor.getString(3));
+            event.location = calCursor.getString(4);
+            event.creator = calCursor.getString(5);
+            event.description = calCursor.getString(6);
+            eventList.add(event);
+        }
+
+        return eventList;
+    }
+
+    public List<Event> getAllEvents(List<Calendar> calendarList) {
+        List<Event> events = new ArrayList<>();
+
+        for (Calendar calendar : calendarList){
+            List<Event> calendarEvents = getEvents(calendar.id);
+
+            for (Event event : calendarEvents){
+                events.add(event);
+            }
+        }
+        return events;
+    }
 }
