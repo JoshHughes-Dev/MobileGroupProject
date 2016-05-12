@@ -1,5 +1,6 @@
 package com.mobilegroupproject.studentorganiser.model;
 
+import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -17,6 +18,7 @@ import java.util.Calendar;
  */
 public class ExtendedWeekViewEvent extends WeekViewEvent implements Parcelable {
 
+    private String strId;
     private Boolean geoSigned;
     private double locationLatitude;
     private double locationLongitude;
@@ -47,17 +49,19 @@ public class ExtendedWeekViewEvent extends WeekViewEvent implements Parcelable {
         this.locationLongitude = lng;
     }
 
-    public ExtendedWeekViewEvent(Event providerEvent){
+    public ExtendedWeekViewEvent(Event providerEvent, long intId){
 
         try {
-            this.setId(Long.parseLong(providerEvent.id));
+            this.setStrId(providerEvent.id);
+            this.setId(intId);
             this.setName(providerEvent.title);
-            this.setStartTime(createCalendarTime(providerEvent.startTime, ""));
-            this.setEndTime(createCalendarTime(providerEvent.endTime, ""));
+            this.setStartTime(createCalendarTime(providerEvent.startTime, providerEvent.date));
+            this.setEndTime(createCalendarTime(providerEvent.endTime, providerEvent.date));
             this.setLocation(providerEvent.location);
-            this.geoSigned = false;
-            this.locationLongitude = 0;
-            this.locationLongitude = 0;
+            this.geoSigned = Boolean.parseBoolean(providerEvent.isSigned);
+            this.locationLatitude = 52.764939;
+            this.locationLongitude = -1.227303;
+            this.setColor(Color.parseColor(providerEvent.hexColor));
 
         } catch (Exception e){
             Log.d("ExtendedWeekViewEvent", providerEvent.id + " :: " + e.toString());
@@ -135,6 +139,15 @@ public class ExtendedWeekViewEvent extends WeekViewEvent implements Parcelable {
         return super.hashCode();
     }
 
+
+    public void setStrId(String sid){
+        this.strId = sid;
+    }
+
+    public String getStrId(){
+        return this.strId;
+    }
+
     public Boolean getGeoSigned(){
         return this.geoSigned;
     }
@@ -172,8 +185,15 @@ public class ExtendedWeekViewEvent extends WeekViewEvent implements Parcelable {
         Calendar calendar = Calendar.getInstance();
 
         String[] timeStrArray = time.split(":");
+        String[] dateStrArray = date.split(":");
 
-        calendar.set(2016,1,1,Integer.parseInt(timeStrArray[0]),Integer.parseInt(timeStrArray[1]));
+        calendar.set(
+                Integer.parseInt(dateStrArray[2]),
+                Integer.parseInt(dateStrArray[1])-1, //month index in calender format is 0-11
+                Integer.parseInt(dateStrArray[0]),
+                Integer.parseInt(timeStrArray[0]),
+                Integer.parseInt(timeStrArray[1])
+        );
 
         return calendar;
     }

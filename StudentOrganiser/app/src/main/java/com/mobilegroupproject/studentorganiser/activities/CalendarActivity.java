@@ -13,6 +13,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -76,8 +77,6 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
         initDataSource();
 
         initDrawer(toolbar);
-
-        initAddNewEntryButton();
 
         initCalendarWidget();
 
@@ -146,15 +145,18 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
 
     private void initDataSource(){
         if(events == null || events.size() == 0) {
-            CalenderUITestData calenderUITestData = new CalenderUITestData(this);
-            events = calenderUITestData.CreateTestData();
+//            CalenderUITestData calenderUITestData = new CalenderUITestData(this);
+//            events = calenderUITestData.CreateTestData();
 
             CalendarProvider calendarProvider = new CalendarProvider(getApplicationContext());
             List<Event> providerEvents = calendarProvider.getAllEvents(calendarProvider.getCalendarDetails());
+            events= new ArrayList<>();
 
-//            for(Event providerEvent : providerEvents){
-//                events.add(new ExtendedWeekViewEvent(providerEvent));
-//            }
+
+            for(int i = 0; i< providerEvents.size(); i++){
+                events.add(new ExtendedWeekViewEvent(providerEvents.get(i),i));
+            }
+
         }
     }
 
@@ -179,22 +181,6 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
             navigationView.setCheckedItem(R.id.nav_cal_day);
         }
 
-    }
-
-
-    /* initialises 'add new entry button' (floating button) */
-    private void initAddNewEntryButton(){
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-
-        if(fab != null) {
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Toast.makeText(CalendarActivity.this, "will open 'new entry' view", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
     }
 
 

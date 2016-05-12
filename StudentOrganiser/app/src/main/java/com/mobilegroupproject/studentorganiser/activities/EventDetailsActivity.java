@@ -17,6 +17,7 @@ public class EventDetailsActivity extends AppCompatActivity implements EventDeta
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         // Check if the device is in landscape mode
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ) {
 

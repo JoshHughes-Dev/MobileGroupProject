@@ -56,7 +56,7 @@ public class CalendarProvider {
         return calendarList;
     }
 
-    public List<Event> getEvents(String calendarId) throws SecurityException {
+    public List<Event> getEvents(String calendarId, String hexColor) throws SecurityException {
         Event event = new Event();
 
         List<Event> eventList = new ArrayList<>();
@@ -93,6 +93,7 @@ public class CalendarProvider {
             event.creator = calCursor.getString(5);
             event.description = calCursor.getString(6);
             event.isSigned = null;
+            event.hexColor = hexColor;
 
             eventList.add(event);   // Add each newly populated event to the list of events
         }
@@ -103,8 +104,13 @@ public class CalendarProvider {
     public List<Event> getAllEvents(List<Calendar> calendarList) {
         List<Event> events = new ArrayList<>();
 
-        for (Calendar calendar : calendarList){
-            List<Event> calendarEvents = getEvents(calendar.id);
+        //for (Calendar calendar : calendarList){
+        for(int i = 0; i < calendarList.size(); i++){
+
+            //get hexCode from string array
+            String chosenHex = (i > Event.hexColors.length)? Event.hexColors[i- (Event.hexColors.length)] : Event.hexColors[i];
+
+            List<Event> calendarEvents = getEvents(calendarList.get(i).id, chosenHex);
 
             for (Event event : calendarEvents){
                 events.add(event);
