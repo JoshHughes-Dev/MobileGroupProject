@@ -15,6 +15,7 @@ public class Event {
     public String location;
     public String creator;
     public String description;
+    public String isSigned; // Was the event attended by the student?
 
     public static String convertMilliToTime(String milli) {
         Date date = new Date(Long.parseLong(milli)); //Input your time in milliseconds

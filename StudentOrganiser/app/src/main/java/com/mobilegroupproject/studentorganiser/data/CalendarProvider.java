@@ -92,7 +92,9 @@ public class CalendarProvider {
             event.location = calCursor.getString(4);
             event.creator = calCursor.getString(5);
             event.description = calCursor.getString(6);
-            eventList.add(event);
+            event.isSigned = null;
+
+            eventList.add(event);   // Add each newly populated event to the list of events
         }
 
         return eventList;
