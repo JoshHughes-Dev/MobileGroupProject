@@ -119,6 +119,8 @@ public class EventDetailsActivity extends AppCompatActivity implements EventDeta
                             startActivity(Intent.createChooser(commentIntent, "Share via"));
                             setShareIntent(commentIntent);
                         }
+                    } else {
+                        Toast.makeText(this, "Personal commentary is empty", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
