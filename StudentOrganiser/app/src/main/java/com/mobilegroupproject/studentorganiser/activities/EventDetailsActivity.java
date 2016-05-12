@@ -88,9 +88,43 @@ public class EventDetailsActivity extends AppCompatActivity implements EventDeta
         // Now get the ShareActionProvider from the item
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(shareItem);
 
-        // Get the ViewPager's current item position and set its ShareIntent.
-
         return super.onCreateOptionsMenu(menu);
+    }
+
+    /* handles nav bar popup menu items*/
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        switch(id){
+            case R.id.menu_share:
+            {
+                //get existing fragment from activity content
+                EventDetailsFragment eventDetailsFragment = (EventDetailsFragment)
+                        getSupportFragmentManager().findFragmentByTag(EVENT_DETAILS_FRAGMENT_TAG);
+
+                //update UI and current local event data
+                if (eventDetailsFragment != null) {
+                    ExtendedWeekViewEvent event =  eventDetailsFragment.getArguments().getParcelable(EventDetailsFragment.SELECTED_EVENT_DATA);
+                    eventDetailsFragment.updateEventDetailsUI();
+
+                    Intent commentIntent = new Intent(); commentIntent.setAction(Intent.ACTION_SEND);
+                    commentIntent.setType("text/plain");
+                    commentIntent.putExtra(Intent.EXTRA_TEXT, event.getPersonalCommentary() );
+                    startActivity(Intent.createChooser(commentIntent, "Share via"));
+
+                    setShareIntent(commentIntent);
+                }
+
+
+            }
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     // Call to update the share intent
