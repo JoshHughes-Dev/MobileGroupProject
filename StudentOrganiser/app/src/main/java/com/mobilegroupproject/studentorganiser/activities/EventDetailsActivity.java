@@ -63,7 +63,7 @@ public class EventDetailsActivity extends AppCompatActivity implements EventDeta
         //update UI and current local event data
         if(eventDetailsFragment != null){
             eventDetailsFragment.getArguments().putParcelable(EventDetailsFragment.SELECTED_EVENT_DATA, selectedEvent);
-            eventDetailsFragment.updateGeoSignUI();
+            eventDetailsFragment.updateEventDetailsUI();
         }
     }
 }

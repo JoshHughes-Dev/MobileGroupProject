@@ -1,6 +1,7 @@
 package com.mobilegroupproject.studentorganiser.fragments;
 
 
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -8,7 +9,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,19 +18,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.alamkanak.weekview.WeekViewEvent;
-import com.mobilegroupproject.studentorganiser.CalenderUITestData;
 import com.mobilegroupproject.studentorganiser.R;
-import com.mobilegroupproject.studentorganiser.activities.CalendarActivity;
+
 import com.mobilegroupproject.studentorganiser.model.ExtendedWeekViewEvent;
 
-import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
+
 import java.util.Date;
 import java.util.Locale;
 
@@ -42,10 +37,14 @@ public class EventDetailsFragment extends Fragment {
 
     public static final String SELECTED_EVENT_DATA = "selectedEventData";
     private OnFragmentInteractionListener mListener;
-    //private ExtendedWeekViewEvent selectedEvent;
+
+
 
     private TextView geoSignTextView;
     private Button geoSignButton;
+    private EditText personalCommentaryEditText;
+    private Button updatePcButton;
+
 
     public EventDetailsFragment() {
 
@@ -62,6 +61,7 @@ public class EventDetailsFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         void onEventDetailsUpdate(ExtendedWeekViewEvent selectedEvent);
     }
+
 
     @Override
     public void onAttach(Context context) {
@@ -80,16 +80,21 @@ public class EventDetailsFragment extends Fragment {
         mListener = null;
     }
 
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         final ExtendedWeekViewEvent selectedEvent = getEvent();
         View view;
 
-        if(selectedEvent == null){
+        if (selectedEvent == null) {
             view = inflater.inflate(R.layout.fragment_event_details_non, container, false);
-        }
-        else{
+        } else {
             view = inflater.inflate(R.layout.fragment_event_details, container, false);
 
             TextView titleTextView = (TextView) view.findViewById(R.id.event_title_textview);
@@ -97,8 +102,13 @@ public class EventDetailsFragment extends Fragment {
 
             geoSignTextView = (TextView) view.findViewById(R.id.geo_sign_textview);
             geoSignButton = (Button) view.findViewById(R.id.geo_sign_button);
-
-            updateGeoSignUI();
+            geoSignButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    selectedEvent.setGeoSigned(true);//TODO this is just dummy
+                    mListener.onEventDetailsUpdate(selectedEvent);
+                }
+            });
 
 
             TextView eventDateTextView = (TextView) view.findViewById(R.id.event_date_textView);
@@ -118,29 +128,7 @@ public class EventDetailsFragment extends Fragment {
                 }
             });
 
-            final EditText personalCommentaryEditText = (EditText) view.findViewById(R.id.personal_commentary_editText);
-            final Button updatePcButton = (Button) view.findViewById(R.id.update_pc_button);
-
-
-            personalCommentaryEditText.setText(selectedEvent.getPersonalCommentary());
-            personalCommentaryEditText.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    //enables update button
-                    updatePcButton.setClickable(true);
-                    updatePcButton.setEnabled(true);
-                }
-            });
-
-            getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-            personalCommentaryEditText.clearFocus();
-
+            updatePcButton = (Button) view.findViewById(R.id.update_pc_button);
             updatePcButton.setClickable(false);
             updatePcButton.setEnabled(false);
             updatePcButton.setOnClickListener(new View.OnClickListener() {
@@ -161,12 +149,36 @@ public class EventDetailsFragment extends Fragment {
                 }
             });
 
+
+            personalCommentaryEditText = (EditText) view.findViewById(R.id.personal_commentary_editText);
+            personalCommentaryEditText.setText(selectedEvent.getPersonalCommentary());
+            personalCommentaryEditText.setFocusable(false);
+            getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            personalCommentaryEditText.clearFocus();
+
+            personalCommentaryEditText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    //enables update button
+                    updatePcButton.setClickable(true);
+                    updatePcButton.setEnabled(true);
+                }
+            });
+
+            updateEventDetailsUI();
         }
 
         return view;
 
     }
-
 
 
     public long getEventId() {
@@ -176,11 +188,11 @@ public class EventDetailsFragment extends Fragment {
     }
 
     //gets event from fragment arguments
-    public ExtendedWeekViewEvent getEvent(){
+    public ExtendedWeekViewEvent getEvent() {
         return getArguments().getParcelable(SELECTED_EVENT_DATA);
     }
 
-    private String createEventTimeText(ExtendedWeekViewEvent selectedEvent){
+    private String createEventTimeText(ExtendedWeekViewEvent selectedEvent) {
 
         Date startTime = selectedEvent.getStartTime().getTime();
         Date endTime = selectedEvent.getEndTime().getTime();
@@ -192,7 +204,7 @@ public class EventDetailsFragment extends Fragment {
 
     }
 
-    private String createEventDateText(ExtendedWeekViewEvent selectedEvent){
+    private String createEventDateText(ExtendedWeekViewEvent selectedEvent) {
         Date date = selectedEvent.getStartTime().getTime();
 
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE dd MMMM", Locale.UK);
@@ -200,16 +212,15 @@ public class EventDetailsFragment extends Fragment {
         return sdf.format(date);
     }
 
-    protected void createIntentToGoogleMaps(){
+    protected void createIntentToGoogleMaps() {
 
         ExtendedWeekViewEvent selectedEvent = getEvent();
 
-        //TODO use current location not placeholder
-        String startLocation = "52.7769062,-1.211218";
+        String startLocation = "0,0";
 
         String destinationLocation = selectedEvent.getLat() + "," + selectedEvent.getLng();
 
-        String uri = "http://maps.google.com/maps?saddr="+ startLocation + "&daddr=" + destinationLocation;
+        String uri = "http://maps.google.com/maps?saddr=" + startLocation + "&daddr=" + destinationLocation;
 
         Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri));
 
@@ -217,30 +228,105 @@ public class EventDetailsFragment extends Fragment {
     }
 
     //public so that activities can call it when done updating
-    public void updateGeoSignUI(){
+    public void updateEventDetailsUI() {
 
         final ExtendedWeekViewEvent selectedEvent = getEvent();
 
-        if(geoSignButton != null && geoSignTextView != null){
+        if (geoSignButton != null && geoSignTextView != null && personalCommentaryEditText != null && updatePcButton != null) {
 
-            if(selectedEvent.getGeoSigned()){
+            if (selectedEvent.getGeoSigned()) {
+                //set geoSign text
                 geoSignTextView.setText("you attended this event!");
                 geoSignTextView.setTextColor(getActivity().getResources().getColor(R.color.success));
+                //disable geoSign button
                 geoSignButton.setClickable(false);
                 geoSignButton.setEnabled(false);
-            }
-            else{
-                geoSignButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
 
-                        selectedEvent.setGeoSigned(true);//TODO this is just dummy
+                //enable pc features
+                personalCommentaryEditText.setFocusableInTouchMode(true);
 
-                        mListener.onEventDetailsUpdate(selectedEvent);
-                    }
-                });
             }
+
         }
     }
 
+
+
+
+
+    // GOOGLE PLAY SERVICE ----------//
+    // My location handling methods -----------------------------------------------------//
+
+//
+////    @Override
+////    public void onClick(View view){
+////        mGoogleApiClient.connect();
+////    }
+//
+//
+//    /**
+//     * Builds a GoogleApiClient configuration.  The addApi() method used to request the LocationServices API.
+//     */
+//    protected synchronized void buildGoogleApiClient() {
+//        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+//                .addConnectionCallbacks(this)
+//                .addOnConnectionFailedListener(this)
+//                .addApi(LocationServices.API)
+//                .build();
+//    }
+//
+//
+//
+//    /**
+//     * when google api clinet connected, check if location permission granted,
+//     * gets last known location and uses this to start a new request and map marker(s) draw
+//     * @param connectionHint
+//     */
+//    @Override
+//    public void onConnected(Bundle connectionHint) {
+//
+//        if (ContextCompat.checkSelfPermission(getActivity(),
+//                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//
+//            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+//
+//            if (mLastLocation != null) {
+//                //assign last location to do something
+//                Toast.makeText(getActivity(),"location found", Toast.LENGTH_LONG).show();
+//
+//
+//                //disconnect when finished
+//                mGoogleApiClient.disconnect();
+//            } else {
+//                Toast.makeText(getActivity(), "location not found", Toast.LENGTH_LONG).show();
+//                //TODO show message with some kind of problem occured
+//            }
+//        } else {
+//            // Show rationale and request permission.
+//            //TODO request permission here
+//            //http://developer.android.com/training/permissions/requesting.html
+//        }
+//
+//
+//    }
+//
+//    /**
+//     * google api client connection failed handler
+//     * @param result
+//     */
+//    @Override
+//    public void onConnectionFailed(ConnectionResult result) {
+//
+//    }
+//
+//    /**
+//     * google api client connection suspended handler
+//     * @param cause
+//     */
+//    @Override
+//    public void onConnectionSuspended(int cause) {
+//        mGoogleApiClient.connect();
+//    }
+//
+//
 }
