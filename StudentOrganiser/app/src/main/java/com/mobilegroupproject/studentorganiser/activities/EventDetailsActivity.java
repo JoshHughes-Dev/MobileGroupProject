@@ -114,12 +114,13 @@ public class EventDetailsActivity extends AppCompatActivity implements EventDeta
                     Intent commentIntent = new Intent(); commentIntent.setAction(Intent.ACTION_SEND);
                     commentIntent.setType("text/plain");
                     commentIntent.putExtra(Intent.EXTRA_TEXT, event.getPersonalCommentary() );
-                    startActivity(Intent.createChooser(commentIntent, "Share via"));
-
-                    setShareIntent(commentIntent);
+                    if (event.getPersonalCommentary() != null) {
+                        if (!event.getPersonalCommentary().equals("")) {
+                            startActivity(Intent.createChooser(commentIntent, "Share via"));
+                            setShareIntent(commentIntent);
+                        }
+                    }
                 }
-
-
             }
                 break;
         }
