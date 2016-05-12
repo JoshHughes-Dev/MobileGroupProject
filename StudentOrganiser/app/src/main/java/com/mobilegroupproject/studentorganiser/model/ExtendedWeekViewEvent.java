@@ -2,8 +2,10 @@ package com.mobilegroupproject.studentorganiser.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.alamkanak.weekview.WeekViewEvent;
+import com.mobilegroupproject.studentorganiser.data.Event;
 
 import java.util.Calendar;
 
@@ -25,15 +27,15 @@ public class ExtendedWeekViewEvent extends WeekViewEvent implements Parcelable {
         super();
     }
 
-    public ExtendedWeekViewEvent(long id, String name, int startYear, int startMonth, int startDay, int startHour, int startMinute, int endYear, int endMonth, int endDay, int endHour, int endMinute) {
+    private ExtendedWeekViewEvent(long id, String name, int startYear, int startMonth, int startDay, int startHour, int startMinute, int endYear, int endMonth, int endDay, int endHour, int endMinute) {
         super(id, name, startYear, startMonth, startDay, startHour, startMinute, endYear, endMonth, endDay, endHour, endMinute);
     }
 
-    public ExtendedWeekViewEvent(long id, String name, String location, Calendar startTime, Calendar endTime) {
+    private ExtendedWeekViewEvent(long id, String name, String location, Calendar startTime, Calendar endTime) {
         super(id, name, location, startTime, endTime);
     }
 
-    public ExtendedWeekViewEvent(long id, String name, Calendar startTime, Calendar endTime) {
+    private ExtendedWeekViewEvent(long id, String name, Calendar startTime, Calendar endTime) {
         super(id, name, startTime, endTime);
     }
 
@@ -43,6 +45,23 @@ public class ExtendedWeekViewEvent extends WeekViewEvent implements Parcelable {
         this.geoSigned = geoSigned;
         this.locationLatitude = lat;
         this.locationLongitude = lng;
+    }
+
+    public ExtendedWeekViewEvent(Event providerEvent){
+
+        try {
+            this.setId(Long.parseLong(providerEvent.id));
+            this.setName(providerEvent.title);
+            this.setStartTime(createCalendarTime(providerEvent.startTime, ""));
+            this.setEndTime(createCalendarTime(providerEvent.endTime, ""));
+            this.setLocation(providerEvent.location);
+            this.geoSigned = false;
+            this.locationLongitude = 0;
+            this.locationLongitude = 0;
+
+        } catch (Exception e){
+            Log.d("ExtendedWeekViewEvent", providerEvent.id + " :: " + e.toString());
+        }
     }
 
 
@@ -140,6 +159,24 @@ public class ExtendedWeekViewEvent extends WeekViewEvent implements Parcelable {
         this.locationLongitude = lng;
     }
 
+    public void setPersonalCommentary(String pc){
+        this.personalCommentary = pc;
+    }
+
+    public String getPersonalCommentary(){
+        return this.personalCommentary;
+    }
+
+
+    private Calendar createCalendarTime(String time, String date){
+        Calendar calendar = Calendar.getInstance();
+
+        String[] timeStrArray = time.split(":");
+
+        calendar.set(2016,1,1,Integer.parseInt(timeStrArray[0]),Integer.parseInt(timeStrArray[1]));
+
+        return calendar;
+    }
 
     //PARCELABLE CODE
 

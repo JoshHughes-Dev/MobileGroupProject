@@ -22,6 +22,9 @@ import com.alamkanak.weekview.WeekView;
 
 import com.mobilegroupproject.studentorganiser.CalenderUITestData;
 import com.mobilegroupproject.studentorganiser.R;
+import com.mobilegroupproject.studentorganiser.data.CalendarProvider;
+import com.mobilegroupproject.studentorganiser.data.Event;
+import com.mobilegroupproject.studentorganiser.data.EventsData;
 import com.mobilegroupproject.studentorganiser.fragments.EventDetailsFragment;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarDateTimeInterpreter;
 import com.mobilegroupproject.studentorganiser.listeners.CalendarEmptyViewLongPressListener;
@@ -37,9 +40,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 
-public class CalendarActivity extends AppCompatActivity {
+public class CalendarActivity extends AppCompatActivity implements EventDetailsFragment.OnFragmentInteractionListener {
 
 
     private final String LAST_SELECTED_EVENT_ID = "lastSelectedEventId";
@@ -70,7 +74,6 @@ public class CalendarActivity extends AppCompatActivity {
         }
 
         initDataSource();
-
 
         initDrawer(toolbar);
 
@@ -145,6 +148,13 @@ public class CalendarActivity extends AppCompatActivity {
         if(events == null || events.size() == 0) {
             CalenderUITestData calenderUITestData = new CalenderUITestData(this);
             events = calenderUITestData.CreateTestData();
+
+            CalendarProvider calendarProvider = new CalendarProvider(getApplicationContext());
+            List<Event> providerEvents = calendarProvider.getAllEvents(calendarProvider.getCalendarDetails());
+
+//            for(Event providerEvent : providerEvents){
+//                events.add(new ExtendedWeekViewEvent(providerEvent));
+//            }
         }
     }
 
@@ -322,5 +332,22 @@ public class CalendarActivity extends AppCompatActivity {
         return null;
     }
 
+    //TODO write code that updates event data
+    public void onEventDetailsUpdate(ExtendedWeekViewEvent selectedEvent){
+
+        Toast.makeText(getApplicationContext(), "todo update", Toast.LENGTH_SHORT).show();
+
+        //... save data then re-get single event?
+
+        //get existing fragment from frame
+        EventDetailsFragment eventDetailsFragment = (EventDetailsFragment)
+                getSupportFragmentManager().findFragmentById(R.id.frame_event_details);
+
+        //update UI and current local event data
+        if(eventDetailsFragment != null){
+            eventDetailsFragment.getArguments().putParcelable(EventDetailsFragment.SELECTED_EVENT_DATA, selectedEvent);
+            eventDetailsFragment.updateGeoSignUI();
+        }
+    }
 
 }

@@ -3,11 +3,15 @@ package com.mobilegroupproject.studentorganiser.activities;
 import android.content.res.Configuration;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.mobilegroupproject.studentorganiser.R;
 import com.mobilegroupproject.studentorganiser.fragments.EventDetailsFragment;
+import com.mobilegroupproject.studentorganiser.model.ExtendedWeekViewEvent;
 
-public class EventDetailsActivity extends AppCompatActivity {
+public class EventDetailsActivity extends AppCompatActivity implements EventDetailsFragment.OnFragmentInteractionListener {
+
+    private final static String EVENT_DETAILS_FRAGMENT_TAG = "eventDetailsFragment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +32,6 @@ public class EventDetailsActivity extends AppCompatActivity {
 
         }
 
-
         setTitle("Event Details");
 
         // Check if we have any data saved
@@ -41,8 +44,26 @@ public class EventDetailsActivity extends AppCompatActivity {
             details.setArguments(getIntent().getExtras());
 
             // Add the details Fragment
-            getSupportFragmentManager().beginTransaction().add(android.R.id.content, details).commit();
+            getSupportFragmentManager().beginTransaction().add(android.R.id.content, details, EVENT_DETAILS_FRAGMENT_TAG).commit();
         }
 
+    }
+
+    //TODO write code that updates event data
+    public void onEventDetailsUpdate(ExtendedWeekViewEvent selectedEvent){
+
+        Toast.makeText(getApplicationContext(), "todo update", Toast.LENGTH_SHORT).show();
+
+        //... save data then re-get single event?
+
+        //get existing fragment from activity content
+        EventDetailsFragment eventDetailsFragment = (EventDetailsFragment)
+                getSupportFragmentManager().findFragmentByTag(EVENT_DETAILS_FRAGMENT_TAG);
+
+        //update UI and current local event data
+        if(eventDetailsFragment != null){
+            eventDetailsFragment.getArguments().putParcelable(EventDetailsFragment.SELECTED_EVENT_DATA, selectedEvent);
+            eventDetailsFragment.updateGeoSignUI();
+        }
     }
 }

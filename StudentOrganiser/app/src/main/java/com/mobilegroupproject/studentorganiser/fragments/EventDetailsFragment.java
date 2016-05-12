@@ -1,14 +1,21 @@
 package com.mobilegroupproject.studentorganiser.fragments;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,9 +41,14 @@ public class EventDetailsFragment extends Fragment {
 
 
     public static final String SELECTED_EVENT_DATA = "selectedEventData";
+    private OnFragmentInteractionListener mListener;
+    //private ExtendedWeekViewEvent selectedEvent;
+
+    private TextView geoSignTextView;
+    private Button geoSignButton;
 
     public EventDetailsFragment() {
-        // Required empty public constructor
+
     }
 
     public static EventDetailsFragment newInstance(ExtendedWeekViewEvent selectedEvent) {
@@ -47,19 +59,26 @@ public class EventDetailsFragment extends Fragment {
         return fragment;
     }
 
-
-    public long getEventId() {
-	    // Returns the index assigned
-        //needed by calendar activity
-        ExtendedWeekViewEvent selectedEvent = getEvent();
-        return selectedEvent.getId();
+    public interface OnFragmentInteractionListener {
+        void onEventDetailsUpdate(ExtendedWeekViewEvent selectedEvent);
     }
 
-    //gets event from fragment arguments
-    public ExtendedWeekViewEvent getEvent(){
-        return getArguments().getParcelable(SELECTED_EVENT_DATA);
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,6 +94,12 @@ public class EventDetailsFragment extends Fragment {
 
             TextView titleTextView = (TextView) view.findViewById(R.id.event_title_textview);
             titleTextView.setText(selectedEvent.getName());
+
+            geoSignTextView = (TextView) view.findViewById(R.id.geo_sign_textview);
+            geoSignButton = (Button) view.findViewById(R.id.geo_sign_button);
+
+            updateGeoSignUI();
+
 
             TextView eventDateTextView = (TextView) view.findViewById(R.id.event_date_textView);
             eventDateTextView.setText(createEventDateText(selectedEvent));
@@ -92,13 +117,68 @@ public class EventDetailsFragment extends Fragment {
                     createIntentToGoogleMaps();
                 }
             });
-        }
 
+            final EditText personalCommentaryEditText = (EditText) view.findViewById(R.id.personal_commentary_editText);
+            final Button updatePcButton = (Button) view.findViewById(R.id.update_pc_button);
+
+
+            personalCommentaryEditText.setText(selectedEvent.getPersonalCommentary());
+            personalCommentaryEditText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    //enables update button
+                    updatePcButton.setClickable(true);
+                    updatePcButton.setEnabled(true);
+                }
+            });
+
+            getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            personalCommentaryEditText.clearFocus();
+
+            updatePcButton.setClickable(false);
+            updatePcButton.setEnabled(false);
+            updatePcButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    //hide keyboard and clear focus
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(personalCommentaryEditText.getWindowToken(), 0);
+                    personalCommentaryEditText.clearFocus();
+
+                    //update data model
+                    String newText = personalCommentaryEditText.getText().toString();
+
+                    selectedEvent.setPersonalCommentary(newText);
+                    //calls interface listener
+                    mListener.onEventDetailsUpdate(selectedEvent);
+                }
+            });
+
+        }
 
         return view;
 
     }
 
+
+
+    public long getEventId() {
+        // Returns the index assigned
+        //needed by calendar activity
+        return getEvent().getId();
+    }
+
+    //gets event from fragment arguments
+    public ExtendedWeekViewEvent getEvent(){
+        return getArguments().getParcelable(SELECTED_EVENT_DATA);
+    }
 
     private String createEventTimeText(ExtendedWeekViewEvent selectedEvent){
 
@@ -134,6 +214,33 @@ public class EventDetailsFragment extends Fragment {
         Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri));
 
         startActivity(intent);
+    }
+
+    //public so that activities can call it when done updating
+    public void updateGeoSignUI(){
+
+        final ExtendedWeekViewEvent selectedEvent = getEvent();
+
+        if(geoSignButton != null && geoSignTextView != null){
+
+            if(selectedEvent.getGeoSigned()){
+                geoSignTextView.setText("you attended this event!");
+                geoSignTextView.setTextColor(getActivity().getResources().getColor(R.color.success));
+                geoSignButton.setClickable(false);
+                geoSignButton.setEnabled(false);
+            }
+            else{
+                geoSignButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        selectedEvent.setGeoSigned(true);//TODO this is just dummy
+
+                        mListener.onEventDetailsUpdate(selectedEvent);
+                    }
+                });
+            }
+        }
     }
 
 }

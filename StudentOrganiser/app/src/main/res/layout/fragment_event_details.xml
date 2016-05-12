@@ -14,7 +14,8 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Event Title"
         android:id="@+id/event_title_textview"
-        android:gravity="center" />
+        android:gravity="center"
+        android:layout_marginBottom="8dp"/>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -32,8 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Geo-sign"
-            android:id="@+id/geo_sign_button"
-            />
+            android:id="@+id/geo_sign_button" />
 
 
     </LinearLayout>
@@ -102,10 +102,42 @@
                 android:text="placeholder location text"
                 android:gravity="center_vertical"/>
         </TableRow>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_mode_edit"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp" />
+            <TextView
+                android:layout_height="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="Personal Commentary..."
+                android:gravity="center_vertical"/>
+            <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:gravity="center_vertical"
+                android:id="@+id/update_pc_button"
+                android:text="Update"/>
+        </TableRow>
 
     </TableLayout>
 
-
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/personal_commentary_editText"
+        android:layout_gravity="center_horizontal"
+        android:windowSoftInputMode="adjustPan|stateHidden"/>
 
 
 </LinearLayout>
