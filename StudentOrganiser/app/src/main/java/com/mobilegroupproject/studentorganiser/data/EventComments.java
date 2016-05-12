@@ -83,9 +83,9 @@ public class EventComments extends SQLiteOpenHelper {
                         "COMMENT" }, "EVENTID = ?", new String[] { eventID },
                 null, null, null);
 
-        if (c.moveToFirst()) {
-            retComment = (c.getString(c.getColumnIndexOrThrow("COMMENT")));
-        }
+        c.moveToFirst();
+        retComment = (c.getString(c.getColumnIndexOrThrow("COMMENT")));
+
         if (c != null && !c.isClosed()) {
             c.close();
         }
