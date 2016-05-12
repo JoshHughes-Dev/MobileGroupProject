@@ -1,8 +1,9 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{fancyvrb,fullpage,framed,graphicx}
+\def\code#1{\texttt{#1}} % use \code{} to format text as programming code
 
-\graphicspath{ {c:/users/coas7/desktop/ObviouslyChangeThisToTheCorrectPath/ } }
+\graphicspath{ {c:/users/coas7/desktop/ } } % will need to be changed to correct path
 
 \title{15COC155 Mobile Application Development: \\
     Student Organiser app}
@@ -52,15 +53,15 @@ The following features are likely to be included in some form:
 Some preliminary interface designs are included in a separate accompanying document, outlining some of the planned features and how they will fit to the device screen width. Diagrams \ref{d1}, \ref{d2} and \ref{d3} below provide an indication into the planned direction of the user interface (UI).
 \newline
 \noindent\emph{***UI original diagrams here***}
-\newline
+
 \section{Implementation}
-This section describes the app in terms of its fulfillment of the initial requirements set out by the lecturer. The app largely meets the requirements while providing useful function and in that sense can be argued to be a success. Students are able to benefit from the app's statistics logging, convenient navigation service (in the case of particular buildings on the campus) and helpful sharing tools provided that they have added their university calendar to their Android phone. Despite these positives, the app is is somewhat limited - both in part by our technical implementation and in part by traits inherent in its design. 
+This section describes the app in terms of its fulfilment of the initial requirements set out by the lecturer. The app largely meets the requirements while providing useful function and in that sense can be argued to be a success. Students are able to benefit from the app's statistics logging, convenient navigation service (in the case of particular buildings on the campus) and helpful sharing tools provided that they have added their university calendar to their Android phone. Despite these positives, the app is is somewhat limited - both in part by our technical implementation and in part by traits inherent in its design. 
 
 \subsection{Limitations}
-The app is unable to ...
+The app is unable  ...
 
-\subsection{Fulfillment of Initial Requirements}
-This section describes the technical fulfillment of the initial requirements along with screenshots to demonstrate.
+\subsection{Fulfilment of the Initial Requirements}
+This section describes the technical fulfilment of the initial requirements along with screenshots to demonstrate.
 
 \subsubsection{Distinct UI Screens}
 Many distinctly different screens are used to display information appropriately, e.g. the day view, the 3-day view, the week view and the event details view. The following screenshots \ref{uiDay}, \ref{uiThreeDay}, \ref{uiWeek} and \ref{uiEventDetails} respectively show these different screens.
@@ -68,27 +69,29 @@ Many distinctly different screens are used to display information appropriately,
 \emph{***UI diagrams here***}
 
 \subsubsection{Compliance with the Activity Lifecycle}
-The various application components are used appropriately and are able to communicate with each other, resulting in a stable app that can be easily managed by the OS - in particular each Activity, Service and BroadcastReceiver are declared and used appropriately. \emph{*** further detail about classes when finished*** }
+The various application components are used appropriately and are able to communicate with each other, resulting in a stable app that can be easily managed by the OS - in particular each Activity and Service are declared and used appropriately. \emph{*** further detail about classes when finished*** }
 \subsubsection{Use of Permissions}
 The app requires the following permissions:\\
     \newline
-    \indent android.permission.INTERNET\\
-    \indent android.permission.ACCESS\_NETWORK\_STATE\\
-    \indent android.permission.GET\_ACCOUNTS\\
-    \indent \emph{... other permissions ...}\\
+    \indent \code{android.permission.INTERNET}\\
+    \indent \code{android.permission.ACCESS\_NETWORK\_STATE}\\
+    \indent \code{android.permission.GET\_ACCOUNTS}\\
+    \indent \code{android.permission.READ\_CALENDAR}\\
+    \indent \code{android.permission.WRITE\_CALENDAR}\\
+    \indent \emph{... ***other permissions*** ...}\\
     \newline
 Only those permissions that are strictly required by the app are requested. In this way the app can claim to be responsible with its use of permissions, an important trait in the current age where privacy is of increasing concern in the minds of many people. 
+
+In particular, the app abides by Google's requirements for use of permissions in version 6.0 Marshmallow (the most recent public release at time of writing) by making requests on demand rather than on load.
 
 \subsubsection{Use of Intents}
 The app makes use of an external Intent to allow the user to choose how to open a maps link in the event that, for example, Google Maps not installed...
 \subsubsection{Custom ContentProvider}
-The app makes use of a custom Calendar Provider...
+The app makes use of a custom Calendar Provider, comprising the classes \code{$\mathtt{\sim}$/data/Calendar}, \code{$\mathtt{\sim}$/data/Event} and \code{$\mathtt{\sim}$/data/CalendarProvider}.
 \subsubsection{Custom Loader}
-The app makes use of a custom Loader in tandem with its custom Calendar Provider...
+The app makes use of a custom Loader in tandem with its custom Calendar Provider in order to load the calendar event data. It should be noted that this is not an ideal use for an asynchronous Loader given that the app requires all of the event data to be present in order to function correctly, however it is a suitable way to demonstrate the use of a custom Loader given the app's scope and the limited timeframe for development.
 \subsubsection{Use of Local storage}
 Local storage is used to store the calendar data provided by the Calendar Provider in the form of a SQLite database.
-\subsubsection{Use of Broadcast events}
-The app makes use of Android's BroadcastReceiver class...
 \subsubsection{Custom View}
 The app makes use of a custom View...
 \subsubsection{Use of ShareActionProvider}
