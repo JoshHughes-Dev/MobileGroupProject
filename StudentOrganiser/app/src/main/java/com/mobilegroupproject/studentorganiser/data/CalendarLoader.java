@@ -2,6 +2,7 @@ package com.mobilegroupproject.studentorganiser.data;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.util.Log;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class CalendarLoader extends AsyncTaskLoader<List<Event>> {
         if (eventData != null) {
             deliverResult(eventData); // Immediately deliver previously loaded data
         }
+        forceLoad();
     }
 
     @Override

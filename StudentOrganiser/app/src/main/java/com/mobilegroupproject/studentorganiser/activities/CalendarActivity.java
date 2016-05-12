@@ -47,17 +47,13 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 
-public class CalendarActivity extends AppCompatActivity implements EventDetailsFragment.OnFragmentInteractionListener {
-        //, LoaderManager.LoaderCallbacks<List<Event>> {
+public class CalendarActivity extends AppCompatActivity implements EventDetailsFragment.OnFragmentInteractionListener
+        , LoaderManager.LoaderCallbacks<List<Event>> {
 
     private final String LAST_SELECTED_EVENT_ID = "lastSelectedEventId";
     private final String CURRENT_NUM_OF_DAYS = "currentNumOfDays";
     private final String LAST_VIEWED_DATE = "lastViewedDate";
     private final String EVENTS_DATA = "eventsData";
-
-    /*
-    private static final int LOADER_ID = 1;     // Part of the loader
-    */
 
     private WeekView calendarWeekView;
     public int currentNumOfDays = 1;
@@ -65,13 +61,6 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
     protected boolean dualPane = false;
     protected ParcelableCalendarDate lastViewedDate;
     protected ArrayList<ExtendedWeekViewEvent> events;
-
-    /*
-    ******************* This will be part of the loader *******************
-    LoaderManager loaderManager = getLoaderManager();
-    loaderManager.initLoader(LOADER_ID, null, mCallbacks);
-    ***********************************************************************
-    */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +94,8 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
             // Send the item selected to showDetails so the right info is shown
             showEventDetails(lastSelectedEventId);
         }
+
+        getLoaderManager().initLoader(0, null, this);   // Initialise the loader
     }
 
     /* handles navigation button click*/
@@ -349,19 +340,26 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
             eventDetailsFragment.updateEventDetailsUI();
         }
     }
-/*
-************************** This will be part of the loader **************************
+
+    /******  Uncomment this and the comment below to see an example of how to use the loader  ********/
+    // private List<Event> testList;
+    /*************************************************************************************************/
+
     public Loader<List<Event>> onCreateLoader(int id, Bundle args) {
-        return null;    // Obviously cannot really return null, must return a loader
+        return new CalendarLoader(getApplicationContext());    // Obviously cannot really return null, must return a loader
     }
 
     public void onLoadFinished(Loader<List<Event>> loader, List<Event> eventsData) {
-        // Do something with eventsData
+        // Do something with the eventsData
+
+        /*****  Uncomment this and the comment above to see an example of how to use the loader  *****/
+        // testList = eventsData;
+        // Log.d("The eventList:", testList.toString());
+        /*********************************************************************************************/
+
     }
 
     public void onLoaderReset(Loader<List<Event>> loader) {
         // Nothing to do
     }
-************************************************************************************
-*/
 }
