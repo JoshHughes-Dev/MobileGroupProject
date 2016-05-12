@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.CalendarContract.Calendars;
 import android.provider.CalendarContract.Events;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +86,7 @@ public class CalendarProvider {
             event = new Event();
             event.id = calCursor.getString(0);
             event.title = calCursor.getString(1);
+            event.date = Event.convertMilliToDate(calCursor.getString(2));
             event.startTime = Event.convertMilliToTime(calCursor.getString(2));
             event.endTime = Event.convertMilliToTime(calCursor.getString(3));
             event.location = calCursor.getString(4);
