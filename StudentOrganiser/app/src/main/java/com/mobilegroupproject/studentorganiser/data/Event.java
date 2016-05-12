@@ -16,10 +16,11 @@ public class Event {
     public String creator;
     public String description;
     public String isSigned; // Was the event attended by the student?
+    public String personalComment;
 
     public static String convertMilliToTime(String milli) {
         Date date = new Date(Long.parseLong(milli)); //Input your time in milliseconds
-        String time = new SimpleDateFormat("hh:mm").format(date);
+        String time = new SimpleDateFormat("HH:mm").format(date);
         return time;
     }
 

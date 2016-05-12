@@ -1,7 +1,9 @@
 package com.mobilegroupproject.studentorganiser.data;
 
 import android.content.Context;
+import android.content.Loader;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.provider.CalendarContract.Calendars;
 import android.provider.CalendarContract.Events;
 import android.util.Log;
@@ -93,6 +95,7 @@ public class CalendarProvider {
             event.creator = calCursor.getString(5);
             event.description = calCursor.getString(6);
             event.isSigned = null;
+            event.personalComment = null;
 
             eventList.add(event);   // Add each newly populated event to the list of events
         }
@@ -112,4 +115,6 @@ public class CalendarProvider {
         }
         return events;
     }
+
+
 }

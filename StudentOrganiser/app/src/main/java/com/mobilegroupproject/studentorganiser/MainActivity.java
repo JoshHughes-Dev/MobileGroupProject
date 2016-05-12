@@ -18,7 +18,6 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
 
-
     int REQUEST_PERMISSION_READ_CALENDAR = 123;
 
     @Override

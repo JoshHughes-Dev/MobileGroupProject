@@ -1,7 +1,9 @@
 package com.mobilegroupproject.studentorganiser.activities;
 
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.os.Bundle;
 
 import android.support.design.widget.FloatingActionButton;
@@ -22,6 +24,7 @@ import com.alamkanak.weekview.WeekView;
 
 import com.mobilegroupproject.studentorganiser.CalenderUITestData;
 import com.mobilegroupproject.studentorganiser.R;
+import com.mobilegroupproject.studentorganiser.data.CalendarLoader;
 import com.mobilegroupproject.studentorganiser.data.CalendarProvider;
 import com.mobilegroupproject.studentorganiser.data.Event;
 import com.mobilegroupproject.studentorganiser.data.EventsData;
@@ -44,12 +47,16 @@ import java.util.List;
 
 
 public class CalendarActivity extends AppCompatActivity implements EventDetailsFragment.OnFragmentInteractionListener {
-
+        //, LoaderManager.LoaderCallbacks<List<Event>> {
 
     private final String LAST_SELECTED_EVENT_ID = "lastSelectedEventId";
     private final String CURRENT_NUM_OF_DAYS = "currentNumOfDays";
     private final String LAST_VIEWED_DATE = "lastViewedDate";
     private final String EVENTS_DATA = "eventsData";
+
+    /*
+    private static final int LOADER_ID = 1;     // Part of the loader
+    */
 
     private WeekView calendarWeekView;
     public int currentNumOfDays = 1;
@@ -57,6 +64,13 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
     protected boolean dualPane = false;
     protected ParcelableCalendarDate lastViewedDate;
     protected ArrayList<ExtendedWeekViewEvent> events;
+
+    /*
+    ******************* This will be part of the loader *******************
+    LoaderManager loaderManager = getLoaderManager();
+    loaderManager.initLoader(LOADER_ID, null, mCallbacks);
+    ***********************************************************************
+    */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -349,5 +363,19 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
             eventDetailsFragment.updateEventDetailsUI();
         }
     }
+/*
+************************** This will be part of the loader **************************
+    public Loader<List<Event>> onCreateLoader(int id, Bundle args) {
+        return null;    // Obviously cannot really return null, must return a loader
+    }
 
+    public void onLoadFinished(Loader<List<Event>> loader, List<Event> eventsData) {
+        // Do something with eventsData
+    }
+
+    public void onLoaderReset(Loader<List<Event>> loader) {
+        // Nothing to do
+    }
+************************************************************************************
+*/
 }
