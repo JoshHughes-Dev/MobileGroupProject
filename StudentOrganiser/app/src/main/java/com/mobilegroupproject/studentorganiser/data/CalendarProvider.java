@@ -11,6 +11,8 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mobilegroupproject.studentorganiser.CalenderUITestData;
+
 /**
  * Created by niall on 11/05/2016.
  */
@@ -46,6 +48,7 @@ public class CalendarProvider {
                         selection,
                         selectionArgs,
                         null);
+
         while (calCursor.moveToNext()) {
             calendar = new Calendar();
             calendar.id = calCursor.getString(0);
@@ -54,6 +57,8 @@ public class CalendarProvider {
             calendar.ownerAccount = calCursor.getString(3);
             calendarList.add(calendar);
         }
+
+        calCursor.close();
 
         return calendarList;
     }
@@ -104,13 +109,16 @@ public class CalendarProvider {
                 event.longitude = coords[1];
             }
 
-            if(event.location.length() < 1){
-                Log.d("event", event.title);
+            //dummy geo signed data(fro demo puropses
+            if(CalenderUITestData.dummyGeoSign(event.id)){
+                event.isSigned = "TRUE";
             }
 
-            eventList.add(event);   // Add each newly populated event to the list of events
+            eventList.add(event);// Add each newly populated event to the list of events
+
         }
 
+        calCursor.close();
         return eventList;
     }
 

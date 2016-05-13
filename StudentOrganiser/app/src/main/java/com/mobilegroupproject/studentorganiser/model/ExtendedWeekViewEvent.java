@@ -210,6 +210,7 @@ public class ExtendedWeekViewEvent extends WeekViewEvent implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.getStrId());
         dest.writeLong(this.getId());
         dest.writeSerializable(this.getStartTime());
         dest.writeSerializable(this.getEndTime());
@@ -220,9 +221,11 @@ public class ExtendedWeekViewEvent extends WeekViewEvent implements Parcelable {
         dest.writeByte((byte) (this.getGeoSigned() ? 1 : 0));
         dest.writeDouble(this.getLat());
         dest.writeDouble(this.getLng());
+        dest.writeString(this.getPersonalCommentary());
     }
 
     protected ExtendedWeekViewEvent(Parcel in) {
+        this.setStrId(in.readString());
         this.setId(in.readLong());
         this.setStartTime((Calendar) in.readSerializable());
         this.setEndTime((Calendar) in.readSerializable());
@@ -233,6 +236,7 @@ public class ExtendedWeekViewEvent extends WeekViewEvent implements Parcelable {
         this.setGeoSigned(in.readByte() != 0);
         this.setLat(in.readDouble());
         this.setLng(in.readDouble());
+        this.setPersonalCommentary(in.readString());
     }
 
     public static final Parcelable.Creator<ExtendedWeekViewEvent> CREATOR = new Parcelable.Creator<ExtendedWeekViewEvent>() {

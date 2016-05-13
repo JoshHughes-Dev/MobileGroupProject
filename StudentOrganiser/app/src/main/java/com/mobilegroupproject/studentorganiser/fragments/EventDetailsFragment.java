@@ -40,13 +40,18 @@ import com.mobilegroupproject.studentorganiser.model.ExtendedWeekViewEvent;
 
 import java.text.SimpleDateFormat;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
+import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class EventDetailsFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class EventDetailsFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
 
     public static final String SELECTED_EVENT_DATA = "selectedEventData";
@@ -113,6 +118,8 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         final ExtendedWeekViewEvent selectedEvent = getEvent();
+        Log.d("EVENT", selectedEvent.getName() + " :: " + selectedEvent.getStrId());
+
         View view;
 
         if (selectedEvent == null) {
@@ -244,7 +251,7 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
         return sdf.format(date);
     }
 
-    private void initLoadingProgressDialog(){
+    private void initLoadingProgressDialog() {
         locationProgressDialog = new ProgressDialog(getActivity());
         locationProgressDialog.setMessage("Getting last known location...");
     }
@@ -253,7 +260,7 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
 
         ExtendedWeekViewEvent selectedEvent = getEvent();
 
-        if(lastKnownLocation != null) {
+        if (lastKnownLocation != null) {
             String startLocation = lastKnownLocation.getLatitude() + "," + lastKnownLocation.getLongitude(); //TODO
 
             String destinationLocation = selectedEvent.getLat() + "," + selectedEvent.getLng();
@@ -267,7 +274,7 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
     }
 
 
-    private void createAlertDialog(String text){
+    private void createAlertDialog(String text) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(text);
         builder.setCancelable(true);
@@ -287,13 +294,18 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
 
         ExtendedWeekViewEvent selectedEvent = getEvent();
 
-        Float distance = getDistanceBetween(selectedEvent.getLat(), selectedEvent.getLng(), lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+        //get distance between
+        boolean isWithinDistance = isWitihinDistance(selectedEvent.getLat(), selectedEvent.getLng(), lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+        //check if within time contraints
+        boolean canGeoSign = isWithinTimeConstraints(selectedEvent.getStartTime(), selectedEvent.getEndTime());
 
-        if(distance > 20){
+        if (!isWithinDistance) {
             String text = "Not close enough to location to geo-sign you. Please go to event location and try again.";
             createAlertDialog(text);
-        }
-        else{
+        } else if (!canGeoSign) {
+            String text = "Can only geo-sign during event or within 5 minutes before";
+            createAlertDialog(text);
+        } else {
             //update object
             selectedEvent.setGeoSigned(true);
             mListener.onEventDetailsUpdate(selectedEvent);
@@ -308,6 +320,8 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
 
         if (geoSignButton != null && geoSignTextView != null && personalCommentaryEditText != null && updatePcButton != null) {
 
+
+            //if geoSigned..
             if (selectedEvent.getGeoSigned()) {
                 //set geoSign text
                 geoSignTextView.setText("you attended this event!");
@@ -321,6 +335,16 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
 
             }
 
+            Calendar now = Calendar.getInstance();
+            //if not signed in and have missed event...
+            if (!selectedEvent.getGeoSigned()){
+                if (selectedEvent.getEndTime().getTimeInMillis() < now.getTimeInMillis()) {
+
+                    geoSignTextView.setText("you didnt attend this event");
+                    geoSignButton.setClickable(false);
+                    geoSignButton.setEnabled(false);
+                }
+            }
         }
     }
 
@@ -332,19 +356,37 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
         }
     }
 
-    private static float getDistanceBetween(double lat1, double lng1, double lat2, double lng2) {
+    private static boolean isWitihinDistance(double lat1, double lng1, double lat2, double lng2) {
         double worldRadius = 6371000; //meters
 
-        double latDist = Math.toRadians(lat2-lat1);
-        double lngDist = Math.toRadians(lng2-lng1);
+        double latDist = Math.toRadians(lat2 - lat1);
+        double lngDist = Math.toRadians(lng2 - lng1);
 
-        double a = Math.sin(latDist/2) * Math.sin(latDist/2) +
+        double a = Math.sin(latDist / 2) * Math.sin(latDist / 2) +
                 Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                        Math.sin(lngDist/2) * Math.sin(lngDist/2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                        Math.sin(lngDist / 2) * Math.sin(lngDist / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         float dist = (float) (worldRadius * c);
 
-        return dist;
+        return (dist > 20) ? false : true;
+
+    }
+
+    public static boolean isWithinTimeConstraints(Calendar startDate, Calendar endDate) {
+
+        Calendar calNow = Calendar.getInstance();
+        long now = calNow.getTimeInMillis();
+
+        long end = endDate.getTimeInMillis();
+        long start = startDate.getTimeInMillis();
+
+        if (now >= start && now < end) {
+            return true;
+        } else if (now >= start - 600000) { // 10 mins before
+            return true;
+        } else {
+            return false;
+        }
     }
 
 
@@ -381,7 +423,9 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
     @Override
     public void onConnected(Bundle connectionHint) {
 
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+        if (ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
             lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
@@ -400,6 +444,7 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
             // Show rationale and request permission.
             //TODO request permission here
             //http://developer.android.com/training/permissions/requesting.html
+
         }
 
 
@@ -427,5 +472,7 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
         Log.i("MainInputFragment", "Connection suspended");
         mGoogleApiClient.connect();
     }
+
+
 
 }

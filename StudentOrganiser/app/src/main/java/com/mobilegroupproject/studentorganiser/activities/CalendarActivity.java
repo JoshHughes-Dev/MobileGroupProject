@@ -330,7 +330,6 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
             intent.setClass(CalendarActivity.this, EventDetailsActivity.class);
 
             intent.putExtra(EventDetailsFragment.SELECTED_EVENT_DATA, getEvent(eventId));
-
             startActivity(intent);
         }
     }
