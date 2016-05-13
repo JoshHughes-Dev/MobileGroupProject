@@ -98,6 +98,15 @@ public class CalendarProvider {
             event.hexColor = hexColor;
             event.personalComment = null;
 
+            String[] coords = Event.getLatLngFromBuilding(event.location);
+            if(coords != null){
+                event.latitude = coords[0];
+                event.longitude = coords[1];
+            }
+
+            if(event.location.length() < 1){
+                Log.d("event", event.title);
+            }
 
             eventList.add(event);   // Add each newly populated event to the list of events
         }
@@ -112,7 +121,7 @@ public class CalendarProvider {
         for(int i = 0; i < calendarList.size(); i++){
 
             //get hexCode from string array
-            String chosenHex = (i > Event.hexColors.length)? Event.hexColors[i- (Event.hexColors.length)] : Event.hexColors[i];
+            String chosenHex = (i < Event.hexColors.length)? Event.hexColors[i] : Event.hexColors[i- (Event.hexColors.length)];
 
             List<Event> calendarEvents = getEvents(calendarList.get(i).id, chosenHex);
 

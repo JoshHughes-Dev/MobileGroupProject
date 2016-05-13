@@ -55,13 +55,14 @@ public class ExtendedWeekViewEvent extends WeekViewEvent implements Parcelable {
             this.setStrId(providerEvent.id);
             this.setId(intId);
             this.setName(providerEvent.title);
-            this.setStartTime(createCalendarTime(providerEvent.startTime, providerEvent.date));
-            this.setEndTime(createCalendarTime(providerEvent.endTime, providerEvent.date));
+            this.setStartTime(createCalendarTime(providerEvent.startTime, providerEvent.date, true));
+            this.setEndTime(createCalendarTime(providerEvent.endTime, providerEvent.date, false));
             this.setLocation(providerEvent.location);
             this.geoSigned = Boolean.parseBoolean(providerEvent.isSigned);
-            this.locationLatitude = 52.764939;
-            this.locationLongitude = -1.227303;
+            this.locationLatitude = Double.parseDouble(providerEvent.latitude);
+            this.locationLongitude = Double.parseDouble(providerEvent.longitude);
             this.setColor(Color.parseColor(providerEvent.hexColor));
+
 
         } catch (Exception e){
             Log.d("ExtendedWeekViewEvent", providerEvent.id + " :: " + e.toString());
@@ -181,19 +182,21 @@ public class ExtendedWeekViewEvent extends WeekViewEvent implements Parcelable {
     }
 
 
-    private Calendar createCalendarTime(String time, String date){
+    private Calendar createCalendarTime(String time, String date, Boolean isStart){
         Calendar calendar = Calendar.getInstance();
 
         String[] timeStrArray = time.split(":");
         String[] dateStrArray = date.split(":");
 
-        calendar.set(
-                Integer.parseInt(dateStrArray[2]),
-                Integer.parseInt(dateStrArray[1])-1, //month index in calender format is 0-11
-                Integer.parseInt(dateStrArray[0]),
-                Integer.parseInt(timeStrArray[0]),
-                Integer.parseInt(timeStrArray[1])
-        );
+        int hour = Integer.parseInt(timeStrArray[0]);
+        int minute = Integer.parseInt(timeStrArray[1]);
+        int second = (isStart)? 30 : 0;
+        int year = Integer.parseInt(dateStrArray[2]);
+        int month = Integer.parseInt(dateStrArray[1]) - 1;
+        int day = Integer.parseInt(dateStrArray[0]);
+
+
+        calendar.set(year,month,day,hour,minute,second);
 
         return calendar;
     }

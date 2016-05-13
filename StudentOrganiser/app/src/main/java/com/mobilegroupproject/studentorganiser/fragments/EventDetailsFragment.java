@@ -216,7 +216,7 @@ public class EventDetailsFragment extends Fragment {
 
         ExtendedWeekViewEvent selectedEvent = getEvent();
 
-        String startLocation = "0,0";
+        String startLocation = "0,0"; //TODO
 
         String destinationLocation = selectedEvent.getLat() + "," + selectedEvent.getLng();
 

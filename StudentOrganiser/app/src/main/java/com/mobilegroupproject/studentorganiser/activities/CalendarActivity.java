@@ -214,18 +214,17 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
 
     private void initDataSource(){
         if(events == null || events.size() == 0) {
-//            CalenderUITestData calenderUITestData = new CalenderUITestData(this);
-//            events = calenderUITestData.CreateTestData();
 
             CalendarProvider calendarProvider = new CalendarProvider(getApplicationContext());
             List<Event> providerEvents = calendarProvider.getAllEvents(calendarProvider.getCalendarDetails());
             events= new ArrayList<>();
 
-
             for(int i = 0; i< providerEvents.size(); i++){
                 events.add(new ExtendedWeekViewEvent(providerEvents.get(i),i));
             }
 
+            int i = 0;
+            int d = i + 1;
         }
     }
 
