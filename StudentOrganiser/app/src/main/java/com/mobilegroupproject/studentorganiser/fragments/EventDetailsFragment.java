@@ -2,13 +2,22 @@ package com.mobilegroupproject.studentorganiser.fragments;
 
 
 
+import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +27,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 import com.mobilegroupproject.studentorganiser.R;
 
 import com.mobilegroupproject.studentorganiser.model.ExtendedWeekViewEvent;
@@ -32,19 +46,27 @@ import java.util.Locale;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class EventDetailsFragment extends Fragment {
+public class EventDetailsFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
 
     public static final String SELECTED_EVENT_DATA = "selectedEventData";
     private OnFragmentInteractionListener mListener;
 
 
-
     private TextView geoSignTextView;
     private Button geoSignButton;
     private EditText personalCommentaryEditText;
     private Button updatePcButton;
+    private ProgressDialog locationProgressDialog;
 
+    //...
+    private Boolean geoOrIntent = true;
+    /**
+     * Provides the entry point to Google Play services.
+     */
+    protected GoogleApiClient mGoogleApiClient;
+
+    protected Location lastKnownLocation;
 
     public EventDetailsFragment() {
 
@@ -80,10 +102,11 @@ public class EventDetailsFragment extends Fragment {
         mListener = null;
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //prep location services api client
+        buildGoogleApiClient();
     }
 
     @Override
@@ -105,8 +128,11 @@ public class EventDetailsFragment extends Fragment {
             geoSignButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    selectedEvent.setGeoSigned(true);//TODO this is just dummy
-                    mListener.onEventDetailsUpdate(selectedEvent);
+
+                    //start location service
+                    locationProgressDialog.show();
+                    geoOrIntent = true;
+                    mGoogleApiClient.connect();
                 }
             });
 
@@ -124,7 +150,11 @@ public class EventDetailsFragment extends Fragment {
             locationTableRow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    createIntentToGoogleMaps();
+
+                    //start location service
+                    locationProgressDialog.show();
+                    geoOrIntent = false;
+                    mGoogleApiClient.connect();
                 }
             });
 
@@ -176,6 +206,8 @@ public class EventDetailsFragment extends Fragment {
             updateEventDetailsUI();
         }
 
+        initLoadingProgressDialog();
+
         return view;
 
     }
@@ -212,20 +244,62 @@ public class EventDetailsFragment extends Fragment {
         return sdf.format(date);
     }
 
+    private void initLoadingProgressDialog(){
+        locationProgressDialog = new ProgressDialog(getActivity());
+        locationProgressDialog.setMessage("Getting last known location...");
+    }
+
     protected void createIntentToGoogleMaps() {
 
         ExtendedWeekViewEvent selectedEvent = getEvent();
 
-        String startLocation = "0,0"; //TODO
+        if(lastKnownLocation != null) {
+            String startLocation = lastKnownLocation.getLatitude() + "," + lastKnownLocation.getLongitude(); //TODO
 
-        String destinationLocation = selectedEvent.getLat() + "," + selectedEvent.getLng();
+            String destinationLocation = selectedEvent.getLat() + "," + selectedEvent.getLng();
 
-        String uri = "http://maps.google.com/maps?saddr=" + startLocation + "&daddr=" + destinationLocation;
+            String uri = "http://maps.google.com/maps?saddr=" + startLocation + "&daddr=" + destinationLocation;
 
-        Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri));
+            Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri));
 
-        startActivity(intent);
+            startActivity(intent);
+        }
     }
+
+
+    private void createAlertDialog(String text){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(text);
+        builder.setCancelable(true);
+        builder.setPositiveButton(
+                "Close",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    protected void evaluateGeoSign() {
+
+        ExtendedWeekViewEvent selectedEvent = getEvent();
+
+        Float distance = getDistanceBetween(selectedEvent.getLat(), selectedEvent.getLng(), lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+
+        if(distance > 20){
+            String text = "Not close enough to location to geo-sign you. Please go to event location and try again.";
+            createAlertDialog(text);
+        }
+        else{
+            //update object
+            selectedEvent.setGeoSigned(true);
+            mListener.onEventDetailsUpdate(selectedEvent);
+        }
+    }
+
 
     //public so that activities can call it when done updating
     public void updateEventDetailsUI() {
@@ -250,83 +324,108 @@ public class EventDetailsFragment extends Fragment {
         }
     }
 
+    private void onLocationFoundCallback() {
+        if (geoOrIntent) {
+            evaluateGeoSign();
+        } else {
+            createIntentToGoogleMaps();
+        }
+    }
+
+    private static float getDistanceBetween(double lat1, double lng1, double lat2, double lng2) {
+        double worldRadius = 6371000; //meters
+
+        double latDist = Math.toRadians(lat2-lat1);
+        double lngDist = Math.toRadians(lng2-lng1);
+
+        double a = Math.sin(latDist/2) * Math.sin(latDist/2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(lngDist/2) * Math.sin(lngDist/2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        float dist = (float) (worldRadius * c);
+
+        return dist;
+    }
 
 
-
-
-    // GOOGLE PLAY SERVICE ----------//
     // My location handling methods -----------------------------------------------------//
 
-//
-////    @Override
-////    public void onClick(View view){
-////        mGoogleApiClient.connect();
-////    }
-//
-//
-//    /**
-//     * Builds a GoogleApiClient configuration.  The addApi() method used to request the LocationServices API.
-//     */
-//    protected synchronized void buildGoogleApiClient() {
-//        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
-//                .addConnectionCallbacks(this)
-//                .addOnConnectionFailedListener(this)
-//                .addApi(LocationServices.API)
-//                .build();
-//    }
-//
-//
-//
-//    /**
-//     * when google api clinet connected, check if location permission granted,
-//     * gets last known location and uses this to start a new request and map marker(s) draw
-//     * @param connectionHint
-//     */
-//    @Override
-//    public void onConnected(Bundle connectionHint) {
-//
-//        if (ContextCompat.checkSelfPermission(getActivity(),
-//                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-//
-//            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-//
-//            if (mLastLocation != null) {
-//                //assign last location to do something
-//                Toast.makeText(getActivity(),"location found", Toast.LENGTH_LONG).show();
-//
-//
-//                //disconnect when finished
-//                mGoogleApiClient.disconnect();
-//            } else {
-//                Toast.makeText(getActivity(), "location not found", Toast.LENGTH_LONG).show();
-//                //TODO show message with some kind of problem occured
-//            }
-//        } else {
-//            // Show rationale and request permission.
-//            //TODO request permission here
-//            //http://developer.android.com/training/permissions/requesting.html
-//        }
-//
-//
-//    }
-//
-//    /**
-//     * google api client connection failed handler
-//     * @param result
-//     */
-//    @Override
-//    public void onConnectionFailed(ConnectionResult result) {
-//
-//    }
-//
-//    /**
-//     * google api client connection suspended handler
-//     * @param cause
-//     */
-//    @Override
-//    public void onConnectionSuspended(int cause) {
-//        mGoogleApiClient.connect();
-//    }
-//
-//
+    /**
+     * Builds a GoogleApiClient configuration.  The addApi() method used to request the LocationServices API.
+     */
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
+
+    /**
+     * makes sure google client disconnects when fragment stops
+     */
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    /**
+     * when google api clinet connected, check if location permission granted,
+     * gets last known location and uses this to start a new request and map marker(s) draw
+     *
+     * @param connectionHint
+     */
+    @Override
+    public void onConnected(Bundle connectionHint) {
+
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+            locationProgressDialog.cancel();
+
+            if (lastKnownLocation != null) {
+                onLocationFoundCallback();
+                //disconnect when finished
+                mGoogleApiClient.disconnect();
+            } else {
+                Toast.makeText(getActivity(), "location not found", Toast.LENGTH_LONG).show();
+                String text = "Could not find location, Check your internet, network or gps connectivity.";
+                createAlertDialog(text);
+            }
+        } else {
+            // Show rationale and request permission.
+            //TODO request permission here
+            //http://developer.android.com/training/permissions/requesting.html
+        }
+
+
+    }
+
+    /**
+     * google api client connection failed handler
+     *
+     * @param result
+     */
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        Log.i("MainInputFragment", "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode());
+        //TODO connection failed message
+    }
+
+    /**
+     * google api client connection suspended handler
+     *
+     * @param cause
+     */
+    @Override
+    public void onConnectionSuspended(int cause) {
+
+        Log.i("MainInputFragment", "Connection suspended");
+        mGoogleApiClient.connect();
+    }
+
 }
