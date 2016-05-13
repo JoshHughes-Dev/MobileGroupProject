@@ -258,7 +258,7 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
 
             String destinationLocation = selectedEvent.getLat() + "," + selectedEvent.getLng();
 
-            String uri = "http://maps.google.com/maps?saddr=" + startLocation + "&daddr=" + destinationLocation;
+            String uri = "http://maps.google.com/maps?saddr=" + startLocation + "&daddr=" + destinationLocation + "&dirflg=w";
 
             Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(uri));
 

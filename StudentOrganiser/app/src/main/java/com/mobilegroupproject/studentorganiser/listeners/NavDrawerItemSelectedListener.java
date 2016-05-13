@@ -1,5 +1,6 @@
 package com.mobilegroupproject.studentorganiser.listeners;
 
+import android.content.Intent;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 import com.alamkanak.weekview.WeekView;
 import com.mobilegroupproject.studentorganiser.R;
 import com.mobilegroupproject.studentorganiser.activities.CalendarActivity;
+import com.mobilegroupproject.studentorganiser.activities.StatsActivity;
 
 
 /**
@@ -73,17 +75,20 @@ public class NavDrawerItemSelectedListener implements NavigationView.OnNavigatio
 
         //handles other items
         switch(id){
-            case R.id.nav_settings:
-                Toast.makeText(context,"will open settings view",Toast.LENGTH_SHORT).show();
-                break;
+//            case R.id.nav_settings:
+//                Toast.makeText(context,"will open settings view",Toast.LENGTH_SHORT).show();
+//                break;
             case R.id.nav_stats:
-                Toast.makeText(context,"will open stats/progress view",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context,"will open stats/progress view",Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(context, StatsActivity.class);
+                context.startActivity(intent);
                 break;
-            case R.id.nav_share:
-                Toast.makeText(context,"will open share view",Toast.LENGTH_SHORT).show();
-                break;
+//            case R.id.nav_share:
+//                Toast.makeText(context,"will open share view",Toast.LENGTH_SHORT).show();
+//                break;
             case R.id.nav_logout:
                 Toast.makeText(context,"will logout user",Toast.LENGTH_SHORT).show();
+                context.finish();
                 break;
         }
 
