@@ -19,9 +19,11 @@ import com.mobilegroupproject.studentorganiser.CalenderUITestData;
 public class CalendarProvider {
 
     private Context context;
+    private EventComments eventCommentsDb;
 
     public CalendarProvider(Context context) {
         this.context = context;
+        this.eventCommentsDb = new EventComments(context, null);
     }
 
     public List<Calendar> getCalendarDetails() throws SecurityException {
@@ -92,6 +94,13 @@ public class CalendarProvider {
         while (calCursor.moveToNext()) {
             event = new Event();
             event.id = calCursor.getString(0);
+
+            if(event.id.equals("f0esemm82mqrfr8f9eqet4ho8g")){
+                int i = 0;
+                int sf = i + 90;
+                Log.d("zxcv", "asdfasdfa");
+            }
+
             event.title = calCursor.getString(1);
             event.date = Event.convertMilliToDate(calCursor.getString(2));
             event.startTime = Event.convertMilliToTime(calCursor.getString(2));
@@ -99,9 +108,9 @@ public class CalendarProvider {
             event.location = calCursor.getString(4);
             event.creator = calCursor.getString(5);
             event.description = calCursor.getString(6);
-            event.isSigned = null;
+            event.isSigned = eventCommentsDb.RequestAttendance(event.id).toString();
             event.hexColor = hexColor;
-            event.personalComment = null;
+            event.personalComment = eventCommentsDb.RequestComment(event.id);
 
             String[] coords = Event.getLatLngFromBuilding(event.location);
             if(coords != null){
@@ -109,9 +118,13 @@ public class CalendarProvider {
                 event.longitude = coords[1];
             }
 
+
+
             //dummy geo signed data(fro demo puropses
             if(CalenderUITestData.dummyGeoSign(event.id)){
                 event.isSigned = "TRUE";
+                event.personalComment = "";
+                eventCommentsDb.SignIn(event.isSigned, event.id);
             }
 
             eventList.add(event);// Add each newly populated event to the list of events
@@ -126,18 +139,23 @@ public class CalendarProvider {
         List<Event> events = new ArrayList<>();
 
         //for (Calendar calendar : calendarList){
-        for(int i = 0; i < calendarList.size(); i++){
+        for (int i = 0; i < calendarList.size(); i++) {
 
             //get hexCode from string array
-            String chosenHex = (i < Event.hexColors.length)? Event.hexColors[i] : Event.hexColors[i- (Event.hexColors.length)];
+            String chosenHex = (i < Event.hexColors.length) ? Event.hexColors[i] : Event.hexColors[i - (Event.hexColors.length)];
 
             List<Event> calendarEvents = getEvents(calendarList.get(i).id, chosenHex);
 
-            for (Event event : calendarEvents){
+            for (Event event : calendarEvents) {
                 events.add(event);
             }
         }
         return events;
+    }
+
+    public void updateEvent(String id, String pc){
+        eventCommentsDb.SignIn(Boolean.TRUE.toString(),id);
+        eventCommentsDb.SetComment(pc,id);
     }
 
 

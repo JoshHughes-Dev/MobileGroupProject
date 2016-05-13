@@ -2,9 +2,7 @@ package com.mobilegroupproject.studentorganiser.activities;
 
 import android.content.res.Configuration;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
+
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.os.Bundle;
@@ -13,8 +11,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.content.Intent;
 import com.mobilegroupproject.studentorganiser.R;
+import com.mobilegroupproject.studentorganiser.data.Calendar;
+import com.mobilegroupproject.studentorganiser.data.CalendarProvider;
+import com.mobilegroupproject.studentorganiser.data.Event;
 import com.mobilegroupproject.studentorganiser.fragments.EventDetailsFragment;
 import com.mobilegroupproject.studentorganiser.model.ExtendedWeekViewEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class EventDetailsActivity extends AppCompatActivity implements EventDetailsFragment.OnFragmentInteractionListener {
 
@@ -61,7 +66,21 @@ public class EventDetailsActivity extends AppCompatActivity implements EventDeta
     //TODO write code that updates event data
     public void onEventDetailsUpdate(ExtendedWeekViewEvent selectedEvent) {
 
-        Toast.makeText(getApplicationContext(), "todo update", Toast.LENGTH_SHORT).show();
+        //... update data
+
+        CalendarProvider calendarProvider = new CalendarProvider(this);
+
+        calendarProvider.updateEvent(
+                selectedEvent.getStrId(),
+                selectedEvent.getPersonalCommentary());
+
+//        calendarProvider = new CalendarProvider(getApplicationContext());
+//        List<Event> providerEvents = calendarProvider.getAllEvents(calendarProvider.getCalendarDetails());
+//        events= new ArrayList<>();
+//
+//        for(int i = 0; i< providerEvents.size(); i++){
+//            events.add(new ExtendedWeekViewEvent(providerEvents.get(i),i));
+//        }
 
         //... save data then re-get single event?
 

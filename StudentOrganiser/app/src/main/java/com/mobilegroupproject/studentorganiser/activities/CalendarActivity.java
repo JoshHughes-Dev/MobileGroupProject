@@ -77,6 +77,7 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
     protected boolean dualPane = false;
     protected ParcelableCalendarDate lastViewedDate;
     public ArrayList<ExtendedWeekViewEvent> events;
+    private CalendarProvider calendarProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +116,12 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initDataSource();
+        initCalendarWidget();
+    }
 
 
     /* handles navigation button click*/
@@ -170,7 +177,7 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
     private void initDataSource(){
         if(events == null || events.size() == 0) {
 
-            CalendarProvider calendarProvider = new CalendarProvider(getApplicationContext());
+            calendarProvider = new CalendarProvider(getApplicationContext());
             List<Event> providerEvents = calendarProvider.getAllEvents(calendarProvider.getCalendarDetails());
             events= new ArrayList<>();
 
@@ -341,9 +348,12 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
     //TODO write code that updates event data
     public void onEventDetailsUpdate(ExtendedWeekViewEvent selectedEvent) {
 
-        Toast.makeText(getApplicationContext(), "todo update", Toast.LENGTH_SHORT).show();
+        //... update data then re-get single event?
+        calendarProvider.updateEvent(
+                selectedEvent.getStrId(),
+                selectedEvent.getPersonalCommentary());
 
-        //... save data then re-get single event?
+        initDataSource();
 
         //get existing fragment from frame
         EventDetailsFragment eventDetailsFragment = (EventDetailsFragment)

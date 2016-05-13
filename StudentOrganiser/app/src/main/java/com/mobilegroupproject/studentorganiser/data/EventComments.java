@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Created by dan on 11/05/2016.
@@ -19,8 +20,8 @@ public class EventComments extends SQLiteOpenHelper {
 
     public SQLiteDatabase myDB;
 
-    public EventComments(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, name, null, version);
+    public EventComments(Context context, SQLiteDatabase.CursorFactory factory) {
+        super(context, DB_NAME, null, DB_VERSION);
         myDB = getWritableDatabase();
     }
 
@@ -29,7 +30,8 @@ public class EventComments extends SQLiteOpenHelper {
 
         myDB = db;
 
-        String query = "CREATE TABLE IF NOT EXISTS COMMENTS_TABLE ( EVENTID TEXT PRIMARY KEY," +
+        String query = "CREATE TABLE IF NOT EXISTS COMMENTS_TABLE ( _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "EVENTID TEXT," +
                 "ATTENDANCE BOOL," +
                 "COMMENT TEXT );";
 
@@ -56,9 +58,31 @@ public class EventComments extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put("EVENTID", eventID);
         values.put("ATTENDANCE", Boolean.TRUE);
+        values.put("COMMENT", "");
 
-        db.insert("", null, values);
+        db.insert(COMMENTS_TABLE, null, values);
+        Log.d("db", getTableAsString(db,COMMENTS_TABLE));
+
         db.close();
+    }
+
+    public String getTableAsString(SQLiteDatabase db, String tableName) {
+        Log.d("db", "getTableAsString called");
+        String tableString = String.format("Table %s:\n", tableName);
+        Cursor allRows  = db.rawQuery("SELECT * FROM " + tableName, null);
+        if (allRows.moveToFirst() ){
+            String[] columnNames = allRows.getColumnNames();
+            do {
+                for (String name: columnNames) {
+                    tableString += String.format("%s: %s\n", name,
+                            allRows.getString(allRows.getColumnIndex(name)));
+                }
+                tableString += "\n";
+
+            } while (allRows.moveToNext());
+        }
+
+        return tableString;
     }
 
     //set comment on an entry
@@ -83,28 +107,46 @@ public class EventComments extends SQLiteOpenHelper {
                         "COMMENT" }, "EVENTID = ?", new String[] { eventID },
                 null, null, null);
 
-        c.moveToFirst();
-        retComment = (c.getString(c.getColumnIndexOrThrow("COMMENT")));
-
-        if (c != null && !c.isClosed()) {
-            c.close();
+        if(c.getCount() > 0) {
+            if (c.moveToFirst()) {
+                do {
+                    int colIndex = c.getColumnIndexOrThrow("COMMENT");
+                    String d = c.getString(colIndex);
+                    retComment = (d);
+                } while (c.moveToNext());
+            }
         }
+        c.close();
 
         return retComment;
     }
 
     //returns whether event was attended
     public Boolean RequestAttendance(String eventID) {
-        Boolean didAttend;
+        Boolean didAttend = false;
         SQLiteDatabase db = this.getWritableDatabase();
 
-        Cursor cursor = db.query(COMMENTS_TABLE, new String[] { "EVENTID",
-                        "ATTENDANCE" }, "EVENTID" + "=?",
-                new String[] { eventID }, null, null, null, null);
-        if (cursor != null)
-            cursor.moveToFirst();
 
-        didAttend = Boolean.valueOf(cursor.getString(1));
+
+        Cursor c = db.query(COMMENTS_TABLE, new String[] { "EVENTID",
+                        "ATTENDANCE" }, "EVENTID = ?", new String[] { eventID },
+                null, null, null);
+
+
+        if(c.getCount() > 0) {
+            if (c.moveToFirst()) {
+                do {
+                    int colIndex = c.getColumnIndexOrThrow("ATTENDANCE");
+                    String d = c.getString(colIndex);
+                    didAttend = Boolean.valueOf(d);
+                } while (c.moveToNext());
+            }
+        }
+        c.close();
+
+//        if (c != null && !c.isClosed()) {
+//            c.close();
+//        }
 
         return didAttend;
     }

@@ -54,7 +54,7 @@ public class StatsActivity extends AppCompatActivity {
                 new DataPoint(1, 50),
                 new DataPoint(2, 10),
                 new DataPoint(3, 100),
-                new DataPoint(4, 100),
+                new DataPoint(4, 66),
                 new DataPoint(5, 0),
                 new DataPoint(6, 0)
         });

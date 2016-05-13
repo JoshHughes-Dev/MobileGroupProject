@@ -294,8 +294,12 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
 
         ExtendedWeekViewEvent selectedEvent = getEvent();
 
+
+        double lng2 = lastKnownLocation.getLongitude();
+        double lat2 = lastKnownLocation.getLatitude();
+
         //get distance between
-        boolean isWithinDistance = isWitihinDistance(selectedEvent.getLat(), selectedEvent.getLng(), lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+        boolean isWithinDistance = isWitihinDistance(selectedEvent.getLat(), selectedEvent.getLng(), lat2, lng2);
         //check if within time contraints
         boolean canGeoSign = isWithinTimeConstraints(selectedEvent.getStartTime(), selectedEvent.getEndTime());
 
@@ -368,7 +372,7 @@ public class EventDetailsFragment extends Fragment implements GoogleApiClient.Co
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         float dist = (float) (worldRadius * c);
 
-        return (dist > 20) ? false : true;
+        return (dist > 7000) ? false : true;
 
     }
 
