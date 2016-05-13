@@ -1,14 +1,20 @@
 package com.mobilegroupproject.studentorganiser.activities;
 
 
+import android.Manifest;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -23,6 +29,12 @@ import android.widget.Toast;
 
 import com.alamkanak.weekview.WeekView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.Api;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationServices;
 import com.mobilegroupproject.studentorganiser.CalenderUITestData;
 import com.mobilegroupproject.studentorganiser.R;
 import com.mobilegroupproject.studentorganiser.data.CalendarLoader;
@@ -40,11 +52,14 @@ import com.mobilegroupproject.studentorganiser.model.ExtendedWeekViewEvent;
 import com.mobilegroupproject.studentorganiser.model.ParcelableCalendarDate;
 
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 public class CalendarActivity extends AppCompatActivity implements EventDetailsFragment.OnFragmentInteractionListener
@@ -54,6 +69,8 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
     private final String CURRENT_NUM_OF_DAYS = "currentNumOfDays";
     private final String LAST_VIEWED_DATE = "lastViewedDate";
     private final String EVENTS_DATA = "eventsData";
+
+    private GoogleApiClient googleApiClient;
 
     private WeekView calendarWeekView;
     public int currentNumOfDays = 1;
@@ -96,7 +113,54 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
         }
 
         getLoaderManager().initLoader(0, null, this);   // Initialise the loader
+
+        googleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).build();
+
+/*        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+
+            Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+            if (lastLocation!=null) {
+                double lat = lastLocation.getLatitude(), lon = lastLocation.getLongitude();
+                Log.d("lat1:", String.valueOf(lat));
+                Log.d("lat2:", String.valueOf(lon));
+            } else {
+                Log.d("LOCATION IS NULL","..");
+            }
+        }*/
+
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (googleApiClient != null) {
+            googleApiClient.connect();
+        }
+        //try {
+
+        //} catch (SecurityException e) {
+            // Har har har
+        //}
+    }
+
+    @Override
+    protected void onStop() {
+        googleApiClient.disconnect();
+        super.onStop();
+    }
+
+    public void onConnected(Bundle bundle) {
+/*        try {
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        double lat = lastLocation.getLatitude(), lon = lastLocation.getLongitude();
+        Log.d("lat1:",String.valueOf(lat));
+        Log.d("lat2:",String.valueOf(lon));
+
+    } catch (SecurityException e) {
+        // Har har har
+    }*/
+}
 
     /* handles navigation button click*/
     @Override
@@ -324,7 +388,7 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
     }
 
     //TODO write code that updates event data
-    public void onEventDetailsUpdate(ExtendedWeekViewEvent selectedEvent){
+    public void onEventDetailsUpdate(ExtendedWeekViewEvent selectedEvent) {
 
         Toast.makeText(getApplicationContext(), "todo update", Toast.LENGTH_SHORT).show();
 
@@ -335,7 +399,7 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
                 getSupportFragmentManager().findFragmentById(R.id.frame_event_details);
 
         //update UI and current local event data
-        if(eventDetailsFragment != null){
+        if (eventDetailsFragment != null) {
             eventDetailsFragment.getArguments().putParcelable(EventDetailsFragment.SELECTED_EVENT_DATA, selectedEvent);
             eventDetailsFragment.updateEventDetailsUI();
         }
