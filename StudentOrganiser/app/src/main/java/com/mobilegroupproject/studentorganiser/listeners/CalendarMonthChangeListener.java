@@ -38,7 +38,7 @@ public class CalendarMonthChangeListener implements MonthLoader.MonthChangeListe
 
         // Return only the events that matches newYear and newMonth.
         ArrayList<ExtendedWeekViewEvent> matchedEvents = new ArrayList<ExtendedWeekViewEvent>();
-        for (ExtendedWeekViewEvent event : events) {
+        for (ExtendedWeekViewEvent event : context.events) {
             if (eventMatches(event, newYear, newMonth)) {
                 matchedEvents.add(event);
             }

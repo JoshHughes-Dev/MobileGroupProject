@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.alamkanak.weekview.MonthLoader;
 import com.alamkanak.weekview.WeekView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -70,14 +71,12 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
     private final String LAST_VIEWED_DATE = "lastViewedDate";
     private final String EVENTS_DATA = "eventsData";
 
-    private GoogleApiClient googleApiClient;
-
     private WeekView calendarWeekView;
     public int currentNumOfDays = 1;
     protected int lastSelectedEventId = 0;
     protected boolean dualPane = false;
     protected ParcelableCalendarDate lastViewedDate;
-    protected ArrayList<ExtendedWeekViewEvent> events;
+    public ArrayList<ExtendedWeekViewEvent> events;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +97,8 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
 
         initDrawer(toolbar);
 
+        getLoaderManager().initLoader(0, null, this);   // Initialise the loader
+
         initCalendarWidget();
 
 
@@ -112,55 +113,9 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
             showEventDetails(lastSelectedEventId);
         }
 
-        getLoaderManager().initLoader(0, null, this);   // Initialise the loader
-
-        googleApiClient = new GoogleApiClient.Builder(this).addApi(LocationServices.API).build();
-
-/*        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-
-            Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-            if (lastLocation!=null) {
-                double lat = lastLocation.getLatitude(), lon = lastLocation.getLongitude();
-                Log.d("lat1:", String.valueOf(lat));
-                Log.d("lat2:", String.valueOf(lon));
-            } else {
-                Log.d("LOCATION IS NULL","..");
-            }
-        }*/
-
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (googleApiClient != null) {
-            googleApiClient.connect();
-        }
-        //try {
 
-        //} catch (SecurityException e) {
-            // Har har har
-        //}
-    }
-
-    @Override
-    protected void onStop() {
-        googleApiClient.disconnect();
-        super.onStop();
-    }
-
-    public void onConnected(Bundle bundle) {
-/*        try {
-        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        double lat = lastLocation.getLatitude(), lon = lastLocation.getLongitude();
-        Log.d("lat1:",String.valueOf(lat));
-        Log.d("lat2:",String.valueOf(lon));
-
-    } catch (SecurityException e) {
-        // Har har har
-    }*/
-}
 
     /* handles navigation button click*/
     @Override
@@ -223,8 +178,6 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
                 events.add(new ExtendedWeekViewEvent(providerEvents.get(i),i));
             }
 
-            int i = 0;
-            int d = i + 1;
         }
     }
 
@@ -424,4 +377,5 @@ public class CalendarActivity extends AppCompatActivity implements EventDetailsF
     public void onLoaderReset(Loader<List<Event>> loader) {
         // Nothing to do
     }
+
 }

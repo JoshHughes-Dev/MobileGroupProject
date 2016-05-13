@@ -64,9 +64,11 @@ public class CalenderUITestData {
     }
 
     public static boolean dummyGeoSign(String eventId){
-        if(eventId.equals("ugj61eipj5v2d637listvv4a3o")){
-            return true;
-        }else if(eventId.equals("i7hglsdkfmns2hjc495be7cbhg")){
+//        if(eventId.equals("ugj61eipj5v2d637listvv4a3o")){
+//            return true;
+//        }else
+
+        if(eventId.equals("i7hglsdkfmns2hjc495be7cbhg")){
             return true;
         }else if(eventId.equals("1glgk8omh9l4polfr1td5antg4")){
             return true;
