@@ -29,7 +29,7 @@ The scalable, inherently mathematical nature of technology makes it an ideal too
 
 It would seem then that there exists space for a technological solution to the problem, both in terms of the appropriateness of technology here and in terms of the students' ability to incorporate such a tool into their pre-existing routine.
 
-The proposed application will therefore be a university "personal assistant / organiser" mobile application on the Android platform for university students (specifically of Loughborough University), designed to help students track and encourage their own attendance to lectures/seminars/labs as well as to help them organise other events such as group assignment meetings and deadlines. The application differs from a simple calendar application in that it focuses heavily on tracking one's own progress, providing myriad feedback through dialogues and animations designed to stimulate and encourage engagement.
+The proposed application will therefore be a university ``personal assistant / organiser" mobile application on the Android platform for university students (specifically of Loughborough University), designed to help students track and encourage their own attendance to lectures/seminars/labs as well as to help them organise other events such as group assignment meetings and deadlines. The application differs from a simple calendar application in that it focuses heavily on tracking one's own progress, providing myriad feedback through dialogues and animations designed to stimulate and encourage engagement.
 
 The application's objective is provide students the power to address their own lecture attendance and organise their day-to-day activities and commitments. The application is primarily designed from the student's perspective as a self management tool rather than to assist the university's own internal attendance monitoring, although wide adoption would undoubtedly provide indirect benefit to the university as well.
 
@@ -42,11 +42,11 @@ The following features are likely to be included in some form:
     \item Push notification reminders of upcoming events using location data - e.g. ``Your upcoming [lecture] is [2 miles] away and starts in [20 minutes]!''.
     \item Automatic attendance registration through two-step geolocation tracking - the user's location can be tracked twice during a session's time slot, minimising the ability of the user to deceive the application into falsely registering attendance. 
     \item Responsible geolocation tracking - tracking will be carried out only when strictly necessary in order to preserve device resources.
-    \item Interfacing with external applications - e.g. a "get directions" action may prompt the Google Maps application to carry out an operation.
+    \item Interfacing with external applications - e.g. a ``get directions" action may prompt the Google Maps application to carry out an operation.
     \item Full compliance with Google material design - the application will sit flush alongside other applications and present an intuitive and familiar interface to the user.
     \item Intuitive touch gestures - e.g. double tap to create a new entry, long press and drag to move events, etc.
     \item Sharing support - a share button can allow the user to share new events with other users who may be interested.
-    \item Frequent, informative feedback - features such as weekly and daily statistics and graphical weekly summaries will allow users to track and visualise their progress. Notifications help users to keep engaged, e.g. "You didn't attend this lecture last week, try attending it this week."
+    \item Frequent, informative feedback - features such as weekly and daily statistics and graphical weekly summaries will allow users to track and visualise their progress. Notifications help users to keep engaged, e.g. ``You didn't attend this lecture last week, try attending it this week."
     \item Gamification of progress feedback - presenting features of the application as a game in order to enhance user feeling of reward.
 \end{itemize}
 
@@ -88,7 +88,7 @@ Only those permissions that are strictly required by the app are requested. In t
 In particular, the app abides by Google's requirements for use of permissions in version 6.0 Marshmallow (the most recent public release at time of writing) by making requests on demand rather than on load.
 
 \subsubsection{Use of Intents}
-The app makes use of an external Intent to allow the user to choose how to open a maps link in the event that, for example, Google Maps not installed...
+The app makes use of two external Intents, the first allows the user to share their personal commentary on a calendar event with any other app that supports text input for the use case scenario of sharing comments or notes with fellow students on the same course as the user, while the second allows the user to view the building location on a maps application, e.g. Google Maps, including directions from their current location.
 \subsubsection{Custom ContentProvider}
 The app makes use of a custom Calendar Provider, comprising the classes \code{$\mathtt{\sim}$/data/Calendar}, \code{$\mathtt{\sim}$/data/Event} and \code{$\mathtt{\sim}$/data/CalendarProvider}.
 \subsubsection{Custom Loader}
