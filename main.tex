@@ -57,6 +57,9 @@ Some preliminary interface designs are included in a separate accompanying docum
 \section{Implementation}
 This section describes the app in terms of its fulfilment of the initial requirements set out by the lecturer. The app largely meets the requirements while providing useful function and in that sense can be argued to be a success. Students are able to benefit from the app's statistics logging, convenient navigation service (in the case of particular buildings on the campus) and helpful sharing tools provided that they have added their university calendar to their Android phone. Despite these positives, the app is is somewhat limited - both in part by our technical implementation and in part by traits inherent in its design. 
 
+\subsection{Structural overview}
+``An overview of the structure of the software at both application and programming level...''
+
 \subsection{Limitations}
 The app is unable  ...
 
@@ -91,7 +94,7 @@ The app makes use of a custom Calendar Provider, comprising the classes \code{$\
 \subsubsection{Custom Loader}
 The app makes use of a custom Loader in tandem with its custom Calendar Provider in order to load the calendar event data. It should be noted that this is not an ideal use for an asynchronous Loader given that the app requires all of the event data to be present in order to function correctly, however it is a suitable way to demonstrate the use of a custom Loader given the app's scope and the limited timeframe for development.
 \subsubsection{Use of Local storage}
-Local storage is used to store the calendar data provided by the Calendar Provider in the form of a SQLite database.
+Local storage is used to store some of the calendar data in the form of a SQLite database.
 \subsubsection{Custom View}
 The app makes use of a custom View...
 \subsubsection{Use of ShareActionProvider}
@@ -103,7 +106,27 @@ When the device is not online, the app notifies the user that the latest calenda
 \subsubsection{Use of Touch gestures}
 A swipe gesture is utilised to access the navigation menu drawer from the left of the screen.
 
+\section{Testing}
+Some testing...
+
 \section{Conclusion}
-Top quality product m8.
+``A discussion on challenges and limitations...''\\
+\newline
+Challenges:
+\begin{itemize}
+    \item Marshmallow permissions (brand new, small demographic, poor documentations)
+    \item Custom content provider documentation poor due to inherently wide scope 
+    \item View challenges (primarily tablet view because of rotations)
+\end{itemize}
+Limitations
+\begin{itemize}
+    \item geolocation on/off? accuracy? (wifi/gps?) signing operates over very small spaces
+    \item too much UI given that all events take place between 8 and 6
+    \item only have the signing data to work with (limited scope for generating statistics)
+    \item dependency on the university a) managing their calendar correctly and b) maintaining the same format etc.
+    \item Loughborough only 
+    \item timezones??
+\end{itemize}
+\noindent\textbf{$Top$ $quality$ $product$ $m8$.}
 
 \end{document}
