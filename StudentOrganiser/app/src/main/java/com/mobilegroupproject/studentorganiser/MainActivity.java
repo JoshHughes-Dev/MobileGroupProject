@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
 
         Button tempCalendarBtn = (Button) findViewById(R.id.temp_calender_button);
-        Button tempApiTestBtn = (Button) findViewById(R.id.temp_api_button);
+
 
         tempCalendarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,12 +50,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
             }
         });
-        tempApiTestBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                StartApiTestIntent();
-            }
-        });
+        
     }
 
     @Override
